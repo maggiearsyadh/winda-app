@@ -71,12 +71,12 @@
   <!-- Navigation Row -->
   <div class="nav-row">
     <!-- Homepage Pill -->
-    <button type="button" class="homepage-pill" aria-label="Halaman utama">
+    <!-- <button type="button" class="homepage-pill" aria-label="Halaman utama">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
       </svg>
       
-    </button>
+    </button> -->
   </div>
 </header>
 
