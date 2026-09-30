@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <path id="frog-head-path-sad" d="
+      M -20, -18
+      C -20, -31 -6, -31 -6, -18
+      C -6, -14 -4, -14 -3, -14
+      L 3, -14
+      C 4, -14 6, -14 6, -18
+      C 6, -31 20, -31 20, -18
+      C 20, -13 23, -9 25, -6
+      L 35, 9
+      L 24, 28
+      L -24, 28
+      L -35, 9
+      L -25, -6
+      C -23, -9 -20, -13 -20, -18 Z" />
+  </defs>
+  <!-- Background Avatar Circle -->
+  <circle cx="60" cy="60" r="58" fill="#71A1E8" />
+  <!-- Frog Head & Face -->
+  <g transform="translate(60, 62)">
+    <use href="#frog-head-path-sad" fill="#3D64A1" />
+    <!-- Mata Sayu Sedih -->
+    <rect x="-16.5" y="-17" width="7.5" height="19" rx="3.75" fill="#181318" />
+    <rect x="9" y="-17" width="7.5" height="19" rx="3.75" fill="#181318" />
+    <circle cx="-12.7" cy="-2" r="1.6" fill="#FFFFFF" />
+    <circle cx="12.7" cy="-2" r="1.6" fill="#FFFFFF" />
+    <!-- Hidung/Nostrils -->
+    <circle cx="-2.5" cy="4" r="1.2" fill="#181318" />
+    <circle cx="2.5" cy="4" r="1.2" fill="#181318" />
+    <!-- Mulut Melengkung Sedih Ke Bawah -->
+    <path d="M -18, 20 Q 0, 7 18, 20" fill="none" stroke="#181318" stroke-width="4.2" stroke-linecap="round" />
+  </g>
+</svg>

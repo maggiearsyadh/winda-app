@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <path id="frog-head-path-happy" d="
+      M -20, -18
+      C -20, -31 -6, -31 -6, -18
+      C -6, -14 -4, -14 -3, -14
+      L 3, -14
+      C 4, -14 6, -14 6, -18
+      C 6, -31 20, -31 20, -18
+      C 20, -13 23, -9 25, -6
+      L 35, 9
+      L 24, 28
+      L -24, 28
+      L -35, 9
+      L -25, -6
+      C -23, -9 -20, -13 -20, -18 Z" />
+  </defs>
+  <!-- Background Avatar Circle -->
+  <circle cx="60" cy="60" r="58" fill="#F8C760" />
+  <!-- Frog Head & Face -->
+  <g transform="translate(60, 62)">
+    <use href="#frog-head-path-happy" fill="#CB8E1E" />
+    <!-- Mata -->
+    <rect x="-16.5" y="-19" width="7.5" height="17" rx="3.75" fill="#181318" />
+    <rect x="9" y="-19" width="7.5" height="17" rx="3.75" fill="#181318" />
+    <circle cx="-12.7" cy="-11" r="1.5" fill="#FFFFFF" />
+    <circle cx="12.7" cy="-11" r="1.5" fill="#FFFFFF" />
+    <!-- Mulut Senyum Terbuka Lebar -->
+    <path d="M -21, 6 Q 0, 7 21, 6 Q 0, 31 -21, 6 Z" fill="#181318" />
+    <!-- Lidah dalam mulut -->
+    <path d="M -13, 20 Q 0, 15 13, 20 Q 0, 29 -13, 20 Z" fill="#CB8E1E" />
+  </g>
+</svg>

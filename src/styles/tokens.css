@@ -1,0 +1,73 @@
+/* ============================================================
+   TOKENS.CSS  –  Figma Design System Tokens
+   Matching the Figma Homepage UI
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* --- Colors --- */
+  --clr-bg-app:        #FFFFFF;
+  --clr-card-cream:    #FAF7F2;
+  --clr-card-border:   #EAE5DC;
+  
+  --clr-primary:       #7052FF;
+  --clr-primary-hover: #5B3FE0;
+  --clr-primary-light: #EBE6FF;
+  --clr-primary-bar:   #D9D1FF;
+  
+  --clr-btn-black:     #1C1C1E;
+  --clr-btn-black-hov: #2C2C2E;
+  
+  --clr-text-main:     #111827;
+  --clr-text-sub:      #4B5563;
+  --clr-text-muted:    #9CA3AF;
+  
+  --clr-dice-orange:   #FF6B4A;
+  --clr-red-dark:      #8C1D24;
+
+  /* --- Typography --- */
+  --font-heading:      'Bebas Neue', 'Plus Jakarta Sans', sans-serif;
+  --font-sans:         'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --fs-xs:   0.75rem;   /* 12px */
+  --fs-sm:   0.875rem;  /* 14px */
+  --fs-base: 1rem;      /* 16px */
+  --fs-md:   1.125rem;  /* 18px */
+  --fs-lg:   1.375rem;  /* 22px */
+  --fs-xl:   1.75rem;   /* 28px */
+  --fs-2xl:  2.25rem;   /* 36px */
+  --fs-3xl:  3rem;      /* 48px */
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+  --fw-extra:   800;
+  --fw-black:   900;
+
+  /* --- Spacing --- */
+  --sp-1:  0.25rem;
+  --sp-2:  0.5rem;
+  --sp-3:  0.75rem;
+  --sp-4:  1rem;
+  --sp-5:  1.25rem;
+  --sp-6:  1.5rem;
+  --sp-8:  2rem;
+  --sp-10: 2.5rem;
+
+  /* --- Border Radius --- */
+  --radius-sm:   0.5rem;
+  --radius-md:   1rem;
+  --radius-lg:   1.5rem;   /* 24px */
+  --radius-pill: 9999px;
+
+  /* --- iOS Safe Area --- */
+  --sat: env(safe-area-inset-top,    0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left,   0px);
+  --sar: env(safe-area-inset-right,  0px);
+
+  --max-w: 430px;
+  --content-px: max(var(--sp-5), var(--sal));
+}

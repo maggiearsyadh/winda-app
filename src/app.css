@@ -1,0 +1,101 @@
+/* ============================================================
+   APP.CSS  –  Global Base Styles (Figma UI Theme)
+   ============================================================ */
+
+@import './styles/tokens.css';
+
+/* ── Reset & Box Model ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background-color: #F0EDE6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  color: var(--clr-text-main);
+  background-color: #F0EDE6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Mobile Container Frame ── */
+#app {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100dvh;
+  background-color: var(--clr-bg-app);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  color: var(--clr-text-main);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.5;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+input, textarea {
+  font-family: inherit;
+  font-size: 16px; /* iOS zoom prevention */
+}
+
+/* ── Subtle Pop Animation ── */
+@keyframes pop {
+  0% { transform: scale(0.94); opacity: 0; }
+  70% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+::selection {
+  background: var(--clr-primary);
+  color: #fff;
+}
