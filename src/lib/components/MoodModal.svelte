@@ -3,6 +3,7 @@
   import { playMoodSong, togglePlayPause, subscribeAudio } from '$lib/audioManager.js';
   import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
   import AngerTutorial from '$lib/components/AngerTutorial.svelte';
+  import BubbleWrap from '$lib/components/BubbleWrap.svelte';
 
   let { isOpen = $bindable(false), onClose } = $props();
 
@@ -191,7 +192,7 @@
                   if (selectedMood?.id === 'anger') {
                     step = 'ANGER_TUTORIAL';
                   } else {
-                    step = 'DRAW';
+                    step = 'BUBBLE';
                   }
                 }}
                 aria-label="Lanjut ke langkah berikutnya"
@@ -219,13 +220,13 @@
         <!-- SPECIAL STEP FOR ANGER: TUTORIAL BERHENTI MARAH -->
         <AngerTutorial
           mood={selectedMood}
-          onNext={() => (step = 'DRAW')}
+          onNext={() => (step = 'BUBBLE')}
           onBack={() => (step = 'RESULT')}
         />
 
-      {:else if step === 'DRAW' && selectedMood}
-        <!-- STEP: TOUCH SCREEN DRAWING CANVAS -->
-        <DrawingCanvas
+      {:else if step === 'BUBBLE' && selectedMood}
+        <!-- STEP: BUBBLE WRAP ANTI-STRESS -->
+        <BubbleWrap
           mood={selectedMood}
           onBack={() => {
             if (selectedMood?.id === 'anger') {
@@ -234,6 +235,15 @@
               step = 'RESULT';
             }
           }}
+          onClose={handleClose}
+          onSwitchToDraw={() => (step = 'DRAW')}
+        />
+
+      {:else if step === 'DRAW' && selectedMood}
+        <!-- STEP: TOUCH SCREEN DRAWING CANVAS (ALTERNATIVE) -->
+        <DrawingCanvas
+          mood={selectedMood}
+          onBack={() => (step = 'BUBBLE')}
           onClose={handleClose}
         />
       {/if}

@@ -29,7 +29,7 @@
       Take a deep breath first, An 
     </h3>
     <p class="tutorial-sub">
-      Sebelum meluapkan unek-unek di kanvas, coba ikuti langkah kecil ini biar hatimu adem:
+      Sebelum lanjut meluapkan rasa kesalmu, coba ikuti langkah kecil ini biar hatimu adem:
     </p>
   </header>
 
@@ -86,7 +86,7 @@
       class="next-canvas-btn"
       onclick={onNext}
     >
-      <span>Mulai Coret-Coret </span>
+      <span>Next Step </span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>
