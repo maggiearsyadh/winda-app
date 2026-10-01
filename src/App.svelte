@@ -6,20 +6,32 @@
   import StatsAndQuiz    from '$lib/components/StatsAndQuiz.svelte';
   import MusicPlayerCard from '$lib/components/MusicPlayerCard.svelte';
   import CarouselDots    from '$lib/components/CarouselDots.svelte';
+  import ComingSoonPage  from '$lib/components/ComingSoonPage.svelte';
 
-  // Interactive Modals
+  // Interactive Modals & Floating Tools
   import MoodModal       from '$lib/components/MoodModal.svelte';
   import QuizModal       from '$lib/components/QuizModal.svelte';
   import NewFeatureModal from '$lib/components/NewFeatureModal.svelte';
+  import FloatingMusic   from '$lib/components/FloatingMusic.svelte';
 
+  let currentRoute = $state(typeof window !== 'undefined' ? (window.location.hash || '#/') : '#/');
   let isMoodOpen = $state(false);
   let isQuizOpen = $state(false);
   let isNewFeatureOpen = $state(false);
 
   $effect(() => {
+    const handleHash = () => {
+      currentRoute = window.location.hash || '#/';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  });
+
+  $effect(() => {
     try {
       const seen = localStorage.getItem('has_seen_bubble_update_v1');
-      if (!seen) {
+      if (!seen && currentRoute !== '#/coming-soon') {
         // Delay slightly for smooth page entrance
         const timer = setTimeout(() => {
           isNewFeatureOpen = true;
@@ -40,30 +52,39 @@
   function handleTryBubbleNow() {
     isMoodOpen = true;
   }
+
+  function goHome() {
+    window.location.hash = '#/';
+  }
 </script>
 
 <div class="figma-app-container">
-  <!-- Top Header Navigation -->
-  <Header />
+  {#if currentRoute === '#/coming-soon'}
+    <!-- Dedicated Coming Soon Page View -->
+    <ComingSoonPage onBack={goHome} />
+  {:else}
+    <!-- Top Header Navigation -->
+    <Header />
 
-  <!-- Main Content -->
-  <main id="main-content">
-    <!-- 1. Character & HOW'S YOUR FEELING Card -->
-    <FeelingCard
-      onConsultationClick={openMood}
-    />
+    <!-- Main Content -->
+    <main id="main-content">
+      <!-- 1. Character & HOW'S YOUR FEELING Card -->
+      <FeelingCard
+        onConsultationClick={openMood}
+      />
 
-    <!-- 2. Middle Row: BE AWARE ! (Lottie) + QUIZ ABOUT ED -->
-    <StatsAndQuiz
-      onQuizClick={openQuiz}
-    />
+      <!-- 2. Middle Row: BE AWARE ! (Lottie) + QUIZ ABOUT ED -->
+      <StatsAndQuiz
+        onQuizClick={openQuiz}
+      />
 
-    <!-- 3. Music Player Card (Matches Mood Color & Corner Screws) -->
-    <MusicPlayerCard />
+      <!-- 3. Music Player Card (Matches Mood Color & Corner Screws) -->
+      <MusicPlayerCard />
 
-    <!-- 4. Bottom Carousel Indicators -->
-    <CarouselDots activeIndex={1} />
-  </main>
+      <!-- 4. Bottom Carousel Indicators -->
+      <CarouselDots activeIndex={1} />
+    </main>
+  {/if}
 </div>
 
 <!-- Interactive Modals -->
@@ -73,6 +94,9 @@
   bind:isOpen={isNewFeatureOpen}
   onTryNow={handleTryBubbleNow}
 />
+
+<!-- Always-Accessible Floating Music Controller -->
+<FloatingMusic />
 
 <style>
   .figma-app-container {

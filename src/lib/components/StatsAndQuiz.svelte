@@ -26,10 +26,14 @@
 </script>
 
 <section class="stats-quiz-row">
-  <!-- Left Card: BE AWARE ! (Lottie Animation) -->
-  <article class="cream-card lottie-card">
+  <!-- Left Card: COMING SOON LINK TO FULL PAGE -->
+  <a
+    href="#/coming-soon"
+    class="cream-card lottie-card"
+    aria-label="Buka halaman fitur baru coming soon"
+  >
     <div class="card-header-lottie">
-      <h3 class="card-title-main">Coming soon! buat fitur ini</h3>
+      <h3 class="card-title-main">Click Fitur Baru</h3>
     </div>
 
     <!-- Lottie Animation Container -->
@@ -42,7 +46,7 @@
         frameborder="0"
       ></iframe>
     </div>
-  </article>
+  </a>
 
   <!-- Right Card: QUIZ ABOUT ED -->
   <article class="cream-card quiz-card">
@@ -111,6 +115,22 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    border: none;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .lottie-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .lottie-card:active {
+    transform: scale(0.98);
   }
 
   .card-header-lottie {
@@ -120,19 +140,20 @@
   .lottie-wrap {
     flex: 1;
     width: 100%;
-    min-height: 130px;
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     border-radius: var(--radius-md);
     overflow: hidden;
+    pointer-events: none;
   }
 
   .lottie-iframe {
     width: 100%;
     height: 100%;
-    min-height: 130px;
+    min-height: 120px;
     border: none;
     outline: none;
     background: transparent;

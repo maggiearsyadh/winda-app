@@ -1,5 +1,15 @@
 <script>
+  import { subscribeAudio, togglePlayPause, audioState } from '$lib/audioManager.js';
+
   let { mood, onBack, onClose, onSwitchToDraw } = $props();
+
+  let isMusicPlaying = $state(audioState.isPlaying);
+
+  $effect(() => {
+    return subscribeAudio(state => {
+      isMusicPlaying = state.isPlaying;
+    });
+  });
 
   // 25 Bubbles (5x5 grid)
   const TOTAL_BUBBLES = 15;
@@ -97,6 +107,18 @@
         {poppedCount} / {TOTAL_BUBBLES}
       </span>
     </div>
+
+    <!-- Quick Music Pause/Play toggle -->
+    <button
+      type="button"
+      class="bubble-music-btn"
+      class:is-active={isMusicPlaying}
+      onclick={togglePlayPause}
+      aria-label={isMusicPlaying ? 'Jeda musik latar' : 'Putar musik latar'}
+    >
+      <span class="bubble-music-icon">{isMusicPlaying ? '' : ''}</span>
+      <span>{isMusicPlaying ? 'Musik: On' : 'Musik: Off'}</span>
+    </button>
 
     <button
       type="button"
@@ -259,6 +281,42 @@
 
   .counter-val {
     font-variant-numeric: tabular-nums;
+  }
+
+  .bubble-music-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, transform 0.1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bubble-music-btn.is-active {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #2563eb;
+  }
+
+  .bubble-music-btn:hover {
+    background: #e2e8f0;
+  }
+
+  .bubble-music-btn:active {
+    transform: scale(0.95);
+  }
+
+  .bubble-music-icon {
+    font-size: 0.85rem;
   }
 
   .refill-btn {
