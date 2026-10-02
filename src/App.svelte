@@ -11,13 +11,13 @@
   // Interactive Modals & Floating Tools
   import MoodModal       from '$lib/components/MoodModal.svelte';
   import QuizModal       from '$lib/components/QuizModal.svelte';
-  import NewFeatureModal from '$lib/components/NewFeatureModal.svelte';
+  import ApologyModal    from '$lib/components/ApologyModal.svelte';
   import FloatingMusic   from '$lib/components/FloatingMusic.svelte';
 
   let currentRoute = $state(typeof window !== 'undefined' ? (window.location.hash || '#/') : '#/');
   let isMoodOpen = $state(false);
   let isQuizOpen = $state(false);
-  let isNewFeatureOpen = $state(false);
+  let isApologyOpen = $state(false);
 
   $effect(() => {
     const handleHash = () => {
@@ -30,11 +30,11 @@
 
   $effect(() => {
     try {
-      const seen = localStorage.getItem('has_seen_bubble_update_v1');
+      const seen = localStorage.getItem('has_seen_apology_oct2');
       if (!seen && currentRoute !== '#/coming-soon') {
         // Delay slightly for smooth page entrance
         const timer = setTimeout(() => {
-          isNewFeatureOpen = true;
+          isApologyOpen = true;
         }, 550);
         return () => clearTimeout(timer);
       }
@@ -47,10 +47,6 @@
 
   function openQuiz() {
     isQuizOpen = true;
-  }
-
-  function handleTryBubbleNow() {
-    isMoodOpen = true;
   }
 
   function goHome() {
@@ -90,10 +86,7 @@
 <!-- Interactive Modals -->
 <MoodModal bind:isOpen={isMoodOpen} />
 <QuizModal bind:isOpen={isQuizOpen} />
-<NewFeatureModal
-  bind:isOpen={isNewFeatureOpen}
-  onTryNow={handleTryBubbleNow}
-/>
+<ApologyModal bind:isOpen={isApologyOpen} />
 
 <!-- Always-Accessible Floating Music Controller -->
 <FloatingMusic />
