@@ -6,35 +6,51 @@
 
   const LOCAL_STORAGE_KEY = 'winda_kanban_tasks_v2';
 
-  // 4 Columns matching Image 1 & Image 2
+  // 4 Columns matching Image 1 & Image 2 (with pastel box background tokens)
   const COLUMNS = [
     {
       id: 'todo',
       label: 'TO DO',
       accentColor: '#4E82B4', // Soft Blue
       bgBadge: '#F0F5FA',
-      textColor: '#2C5882'
+      textColor: '#2C5882',
+      boxBg: '#F0F6FC',
+      boxBorder: '#D6E6F5',
+      counterBg: '#DCEBF8',
+      counterColor: '#2C5882'
     },
     {
       id: 'in_progress',
       label: 'IN-PROGRESS',
       accentColor: '#D97D3E', // Soft Orange
       bgBadge: '#FCF5ED',
-      textColor: '#8F481B'
+      textColor: '#8F481B',
+      boxBg: '#FDF4EC',
+      boxBorder: '#F7DFCD',
+      counterBg: '#FAE4D3',
+      counterColor: '#8F481B'
     },
     {
       id: 'pending',
       label: 'PENDING',
       accentColor: '#C45959', // Soft Red
       bgBadge: '#FAF0F0',
-      textColor: '#873131'
+      textColor: '#873131',
+      boxBg: '#FDF1F1',
+      boxBorder: '#F8D7D7',
+      counterBg: '#F9DCDC',
+      counterColor: '#873131'
     },
     {
       id: 'completed',
       label: 'COMPLETED',
       accentColor: '#6D9C3F', // Soft Green (user requested)
       bgBadge: '#F2F7ED',
-      textColor: '#446823'
+      textColor: '#446823',
+      boxBg: '#EFF7EC',
+      boxBorder: '#D6ECCB',
+      counterBg: '#DAEED0',
+      counterColor: '#446823'
     }
   ];
 
@@ -663,12 +679,12 @@
         {@const isVisible = activeMobileTab === 'all' || activeMobileTab === col.id}
 
         {#if isVisible}
-          <!-- Column Card Box -->
+          <!-- Column Card Box with Pastel Background Theme -->
           <section
-            class="clean-column-box"
+            class="clean-column-box col-{col.id}"
             class:is-drag-target={dragOverColumnId === col.id}
             data-column-id={col.id}
-            style="--col-accent: {col.accentColor};"
+            style="--col-accent: {col.accentColor}; --col-box-bg: {col.boxBg}; --col-box-border: {col.boxBorder}; --col-counter-bg: {col.counterBg}; --col-counter-color: {col.counterColor};"
             ondragover={(e) => handleDragOver(e, col.id)}
             ondragenter={() => dragOverColumnId = col.id}
             ondragleave={(e) => handleDragLeave(e, col.id)}
@@ -828,7 +844,7 @@
     {/if}
 
     <!-- Quick Move Row (1-Tap navigation) -->
-    <div class="quick-status-mover" role="group" aria-label="Aksi status tugas" ontouchstart={(e) => e.stopPropagation()}>
+    <!-- <div class="quick-status-mover" role="group" aria-label="Aksi status tugas" ontouchstart={(e) => e.stopPropagation()}>
       {#if colId === 'todo'}
         <button
           type="button"
@@ -876,7 +892,7 @@
           &larr; Pending
         </button>
       {/if}
-    </div>
+    </div> -->
   </article>
 {/snippet}
 
@@ -1321,10 +1337,10 @@
     flex: 1;
   }
 
-  /* ── Column Box (Matches Clean SaaS style in Image 1 & 2) ── */
+  /* ── Column Box (Pastel Themed per Status) ── */
   .clean-column-box {
-    background: #F4F4F5;
-    border: 1px solid #E4E4E7;
+    background: var(--col-box-bg, #F4F4F5);
+    border: 1px solid var(--col-box-border, #E4E4E7);
     border-radius: 14px;
     padding: 8px 6px;
     display: flex;
@@ -1336,10 +1352,28 @@
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.02);
   }
 
+  /* Explicit pastel styles as fallback & consistency */
+  .clean-column-box.col-todo {
+    background-color: #F0F6FC;
+    border-color: #D6E6F5;
+  }
+  .clean-column-box.col-in_progress {
+    background-color: #FDF4EC;
+    border-color: #F7DFCD;
+  }
+  .clean-column-box.col-pending {
+    background-color: #FDF1F1;
+    border-color: #F8D7D7;
+  }
+  .clean-column-box.col-completed {
+    background-color: #EFF7EC;
+    border-color: #D6ECCB;
+  }
+
   .clean-column-box.is-drag-target {
-    background: #F4F8FC;
+    background: #FFFFFF;
     border: 1.5px dashed var(--col-accent, #4E82B4);
-    box-shadow: inset 0 0 0 1px rgba(78, 130, 180, 0.12), 0 4px 14px rgba(78, 130, 180, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(78, 130, 180, 0.15), 0 4px 14px rgba(78, 130, 180, 0.1);
     transform: translateY(-2px);
   }
 
@@ -1383,9 +1417,9 @@
   .col-counter-chip {
     font-size: 0.58rem;
     font-weight: 800;
-    color: #71717A;
-    background: #E4E4E7;
-    padding: 1px 5px;
+    color: var(--col-counter-color, #71717A);
+    background: var(--col-counter-bg, #E4E4E7);
+    padding: 1px 5.5px;
     border-radius: 999px;
     flex-shrink: 0;
   }
@@ -1405,7 +1439,7 @@
     border-radius: 4px;
     border: none;
     background: transparent;
-    color: #71717A;
+    color: var(--col-counter-color, #71717A);
     font-size: 0.75rem;
     font-weight: 800;
     display: flex;
@@ -1415,7 +1449,7 @@
   }
 
   .col-icon-btn:hover {
-    background: #E4E4E7;
+    background: var(--col-counter-bg, #E4E4E7);
     color: #18181B;
   }
 
@@ -1436,7 +1470,8 @@
 
   .empty-text {
     font-size: 0.68rem;
-    color: #A1A1AA;
+    color: var(--col-counter-color, #A1A1AA);
+    opacity: 0.7;
     font-weight: 600;
   }
 
@@ -1448,9 +1483,10 @@
     gap: 4px;
     padding: 5px 6px;
     border-radius: 10px;
-    border: 1px dashed #D4D4D8;
-    background: #FFFFFF;
-    color: #71717A;
+    border: 1px dashed var(--col-box-border, #D4D4D8);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(4px);
+    color: var(--col-counter-color, #71717A);
     font-size: 0.7rem;
     font-weight: 700;
     cursor: pointer;
@@ -1461,9 +1497,9 @@
   }
 
   .column-bottom-add-btn:hover {
-    background: #F8FAFC;
-    border-color: #4E82B4;
-    color: #4E82B4;
+    background: #FFFFFF;
+    border-color: var(--col-accent, #4E82B4);
+    color: var(--col-accent, #4E82B4);
   }
 
   .plus-circle {
