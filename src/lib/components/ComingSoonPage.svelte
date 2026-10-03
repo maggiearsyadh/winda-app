@@ -55,7 +55,7 @@
     },
     {
       id: 'on_hold',
-      title: 'Calculator Scincetific',
+      title: 'Calculator Scientific',
       count: '0',
       label: 'Task',
       icon: 'hourglass',
@@ -160,7 +160,7 @@
   <!-- Big Headline: Start today's tasks. -->
   <div class="headline-container">
     <h1 class="start-tasks-title">
-      <span class="muted-word">Winda's</span> Task<br />Management.
+      <span class="muted-word">Winda's</span> Task Management.
     </h1>
     <p class="headline-sub">
       mau ngapain aja hari ini An?
@@ -294,7 +294,7 @@
     width: 100%;
     max-width: 100%;
     min-height: 100dvh;
-    padding: max(var(--sp-4), var(--sat)) 20px max(var(--sp-6), var(--sab));
+    padding: max(var(--sp-4), var(--sat)) 16px max(90px, var(--sab));
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -431,16 +431,17 @@
 
   /* ── Big Headline: Start today's tasks. ── */
   .headline-container {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
 
   .start-tasks-title {
-    font-size: 1.95rem;
-    font-weight: 600;
+    font-size: 1.62rem;
+    font-weight: 700;
     color: #18181B;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    margin: 0 0 6px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+    word-break: normal;
   }
 
   .muted-word {
@@ -459,8 +460,8 @@
   .four-boxes-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 26px;
+    gap: 10px;
+    margin-bottom: 22px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -468,9 +469,9 @@
   .stat-box-card {
     background: #f6fff6;
     border: none;
-    border-radius: 24px;
-    padding: 16px 14px 14px;
-    min-height: 135px;
+    border-radius: 20px;
+    padding: 13px 11px 11px;
+    min-height: 126px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -483,6 +484,7 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
+    min-width: 0;
   }
 
   .stat-box-card:hover {
@@ -513,31 +515,40 @@
   /* Top Row inside Card */
   .box-top-row {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 7px;
     position: relative;
     z-index: 1;
+    min-width: 0;
+    width: 100%;
   }
 
   .box-icon-disc {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     border-radius: 50%;
     background: #EDF4EA;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
   }
 
   .box-title-text {
-    font-size: 0.84rem;
+    font-size: 0.77rem;
     font-weight: 700;
     color: #18181B;
-    white-space: nowrap;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
   }
 
   /* Bottom Row inside Card: Count + Label */
@@ -551,16 +562,16 @@
   }
 
   .box-count-number {
-    font-size: 2rem;
-    font-weight: 650;
+    font-size: 1.85rem;
+    font-weight: 700;
     color: #18181B;
     line-height: 1;
     letter-spacing: -0.03em;
   }
 
   .box-unit-label {
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 0.88rem;
+    font-weight: 600;
     color: #71717A;
   }
 
