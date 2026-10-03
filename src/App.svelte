@@ -7,6 +7,7 @@
   import MusicPlayerCard from '$lib/components/MusicPlayerCard.svelte';
   import CarouselDots    from '$lib/components/CarouselDots.svelte';
   import ComingSoonPage  from '$lib/components/ComingSoonPage.svelte';
+  import KanbanBoard     from '$lib/components/KanbanBoard.svelte';
 
   // Interactive Modals & Floating Tools
   import MoodModal       from '$lib/components/MoodModal.svelte';
@@ -31,7 +32,7 @@
   $effect(() => {
     try {
       const seen = localStorage.getItem('has_seen_apology_oct2');
-      if (!seen && currentRoute !== '#/coming-soon') {
+      if (!seen && (currentRoute === '#/' || currentRoute === '')) {
         // Delay slightly for smooth page entrance
         const timer = setTimeout(() => {
           isApologyOpen = true;
@@ -58,6 +59,9 @@
   {#if currentRoute === '#/coming-soon'}
     <!-- Dedicated Coming Soon Page View -->
     <ComingSoonPage onBack={goHome} />
+  {:else if currentRoute === '#/kanban'}
+    <!-- Dedicated Kanban Board View -->
+    <KanbanBoard onBack={goHome} />
   {:else}
     <!-- Top Header Navigation -->
     <Header />
@@ -98,6 +102,11 @@
     flex-direction: column;
     position: relative;
     padding-bottom: max(var(--sp-4), var(--sab));
+    font-family: 'Urbanist', var(--font-sans);
+  }
+
+  .figma-app-container :global(*) {
+    font-family: inherit;
   }
 
   :global(#main-content) {

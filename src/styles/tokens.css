@@ -3,7 +3,7 @@
    Matching the Figma Homepage UI
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Urbanist:ital,wght@0,300..900;1,300..900&display=swap');
 
 :root {
   /* --- Colors --- */
@@ -27,8 +27,9 @@
   --clr-red-dark:      #8C1D24;
 
   /* --- Typography --- */
-  --font-heading:      'Bebas Neue', 'Plus Jakarta Sans', sans-serif;
-  --font-sans:         'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading:      'Bebas Neue', 'Urbanist', sans-serif;
+  --font-sans:         'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-urbanist:     'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --fs-xs:   0.75rem;   /* 12px */
   --fs-sm:   0.875rem;  /* 14px */

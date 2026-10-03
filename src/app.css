@@ -50,6 +50,26 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  transition: max-width 0.25s ease;
+}
+
+#app:has(.clean-kanban-root) {
+  max-width: 440px;
+  background-color: #FFFFFF;
+  overflow-x: hidden;
+}
+
+#app:has(.coming-soon-pastel-page) {
+  max-width: 440px;
+  background-color: #DFECDA;
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  #app:has(.clean-kanban-root) {
+    max-width: 1000px;
+  }
 }
 
 h1, h2, h3, h4 {

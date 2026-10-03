@@ -33,7 +33,7 @@
     aria-label="Buka halaman fitur baru coming soon"
   >
     <div class="card-header-lottie">
-      <h3 class="card-title-main">Click Fitur Baru</h3>
+      <h3 class="card-title-main">Task Management</h3>
     </div>
 
     <!-- Lottie Animation Container -->

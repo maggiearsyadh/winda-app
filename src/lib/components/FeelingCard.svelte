@@ -78,7 +78,7 @@
 
   .feeling-title {
     font-family: var(--font-heading);
-    font-size: clamp(2rem, 8vw, 2.2rem);
+    font-size: clamp(2rem, 7vw, 2rem);
     letter-spacing: 0.04em;
     color: #000000;
     line-height: 1;

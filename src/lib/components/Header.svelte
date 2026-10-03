@@ -70,13 +70,14 @@
 
   <!-- Navigation Row -->
   <div class="nav-row">
-    <!-- Homepage Pill -->
-    <!-- <button type="button" class="homepage-pill" aria-label="Halaman utama">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    <!-- <a href="#/kanban" class="nav-pill kanban-pill" aria-label="Buka Focus Board Kanban">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="9" y1="3" x2="9" y2="21"></line>
+        <line x1="15" y1="3" x2="15" y2="21"></line>
       </svg>
-      
-    </button> -->
+      <span>to-do-list</span>
+    </a> -->
   </div>
 </header>
 
@@ -180,24 +181,41 @@
     gap: var(--sp-2);
   }
 
-  .homepage-pill {
+  .nav-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background-color: var(--clr-primary);
-    color: #ffffff;
-    font-weight: var(--fw-bold);
-    font-size: var(--fs-xs);
-    padding: 0 14px;
-    height: 40px;
-    border-radius: var(--radius-pill);
-    border: none;
-    box-shadow: 0 2px 8px rgba(112, 82, 255, 0.25);
-    white-space: nowrap;
-    transition: transform 0.15s ease, filter 0.15s ease;
+    background: #FFFFFF;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 6px 14px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1.5px solid #E2E8F0;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .homepage-pill:active {
-    transform: scale(0.97);
+  .nav-pill:active {
+    transform: scale(0.96);
+  }
+
+  .nav-pill.kanban-pill {
+    background: #6D9C3F;
+    color: #FFFFFF;
+    border-color: #6D9C3F;
+    box-shadow: 0 4px 12px rgba(78, 130, 180, 0.25);
+  }
+
+  .new-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6D9C3F;
+    border: 1px solid #FFFFFF;
   }
 </style>
