@@ -90,53 +90,55 @@
     const in3Days = new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0];
     const in6Days = new Date(Date.now() + 86400000 * 6).toISOString().split('T')[0];
 
-    return [
-      {
-        id: 'task-1',
-        title: 'Conduct User Research',
-        description: 'Develop a set of 10 open-ended questions that cover daily habits, pain points, and expectations for the project.',
-        status: 'todo',
-        priority: 'high',
-        due_date: tomorrow,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'task-2',
-        title: 'API Integration & Frontend Sync',
-        description: 'Integrate backend endpoints with frontend components to ensure seamless communication and data flow.',
-        status: 'in_progress',
-        priority: 'low',
-        due_date: in6Days,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'task-3',
-        title: 'Finalize UI Style Guide',
-        description: 'Define typography, color palette, iconography, and button styles. Ensure consistency with brand design system.',
-        status: 'in_progress',
-        priority: 'med',
-        due_date: in3Days,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'task-4',
-        title: 'Fix Payment Gateway & Auth Errors',
-        description: 'Debugged the payment flow integration to address edge cases and improve error messaging for users.',
-        status: 'pending',
-        priority: 'high',
-        due_date: tomorrow,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'task-5',
-        title: 'Marketing Plan & Campaign Launch',
-        description: 'Implement and execute pre-campaign strategies to build anticipation, engage target audience, and launch.',
-        status: 'completed',
-        priority: 'med',
-        due_date: null,
-        created_at: new Date().toISOString()
-      }
-    ];
+    // return [
+    //   {
+    //     id: 'task-1',
+    //     title: 'Conduct User Research',
+    //     description: 'Develop a set of 10 open-ended questions that cover daily habits, pain points, and expectations for the project.',
+    //     status: 'todo',
+    //     priority: 'high',
+    //     due_date: tomorrow,
+    //     created_at: new Date().toISOString()
+    //   },
+    //   {
+    //     id: 'task-2',
+    //     title: 'API Integration & Frontend Sync',
+    //     description: 'Integrate backend endpoints with frontend components to ensure seamless communication and data flow.',
+    //     status: 'in_progress',
+    //     priority: 'low',
+    //     due_date: in6Days,
+    //     created_at: new Date().toISOString()
+    //   },
+    //   {
+    //     id: 'task-3',
+    //     title: 'Finalize UI Style Guide',
+    //     description: 'Define typography, color palette, iconography, and button styles. Ensure consistency with brand design system.',
+    //     status: 'in_progress',
+    //     priority: 'med',
+    //     due_date: in3Days,
+    //     created_at: new Date().toISOString()
+    //   },
+    //   {
+    //     id: 'task-4',
+    //     title: 'Fix Payment Gateway & Auth Errors',
+    //     description: 'Debugged the payment flow integration to address edge cases and improve error messaging for users.',
+    //     status: 'pending',
+    //     priority: 'high',
+    //     due_date: tomorrow,
+    //     created_at: new Date().toISOString()
+    //   },
+    //   {
+    //     id: 'task-5',
+    //     title: 'Marketing Plan & Campaign Launch',
+    //     description: 'Implement and execute pre-campaign strategies to build anticipation, engage target audience, and launch.',
+    //     status: 'completed',
+    //     priority: 'med',
+    //     due_date: null,
+    //     created_at: new Date().toISOString()
+    //   }
+    // ];
+
+    return [];
   }
 
   function saveLocalTasks(taskList) {
