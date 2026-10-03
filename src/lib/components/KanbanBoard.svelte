@@ -1774,34 +1774,44 @@
     margin-left: auto;
   }
 
-  /* ── Modal Design ── */
+  /* ── Modal Design: Centered Pop-up Modal ── */
   .clean-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     z-index: 10000;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding-bottom: max(0px, var(--sab));
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .clean-modal-card {
     background: #FFFFFF;
     width: 100%;
-    max-width: 440px;
-    border-radius: 20px 20px 0 0;
-    padding: 18px 20px 24px;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
-    max-height: 90dvh;
+    max-width: 390px;
+    border-radius: 22px;
+    padding: 20px 18px 20px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+    max-height: 88dvh;
     overflow-y: auto;
-    animation: modalSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    margin: auto;
   }
 
-  @keyframes modalSlide {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+  @keyframes modalPopIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .modal-card-head {
