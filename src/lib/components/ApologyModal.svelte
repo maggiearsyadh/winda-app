@@ -1,172 +1,193 @@
 <script>
   let { isOpen = $bindable(false) } = $props();
-
-  let forgiven = $state(false);
-  let poutCount = $state(0);
-
-  const poutResponses = [
-    "tebus kesalahan pake apa aja hari ini, tell him..",
-    "jangan kesel lama-lama dong hahahaha",
-    "aplikasi ga bisa dibuka sebelum click maafin",
-    "tebus kesalahan pake apa aja hari ini, tell him..",
-    "aplikasi ga bisa dibuka sebelum click maafin",
+  // ==============================================================
+  // 🔑 SET PASSWORD DI SINI:
+  // ==============================================================
+  const PASSWORDS = [
+    "windalucupermatacalli" // <-- ganti dengan password yang kamu mau
   ];
 
-  function handlePout() {
-    poutCount = (poutCount + 1) % poutResponses.length;
+  let inputPhrase = $state('');
+  let isWrong = $state(false);
+  let errorMessage = $state('');
+  let isSuccess = $state(false);
+  let showClue = $state(false);
+  let showPassword = $state(false);
+  let attempts = $state(0);
+
+  const funnyTaunts = [
+    "Wrong password",
+  ];
+
+  function handleSubmit() {
+    const cleanedInput = inputPhrase.trim().toLowerCase();
+
+    if (!cleanedInput) {
+      errorMessage = "Please enter the password!";
+      isWrong = true;
+      triggerShake();
+      return;
+    }
+
+    const isMatch = PASSWORDS.some(p => p.toLowerCase() === cleanedInput);
+
+    if (isMatch) {
+      // BERHASIL DIBUKA!
+      isSuccess = true;
+      isWrong = false;
+      errorMessage = '';
+
+      try {
+        localStorage.setItem("winda_app_locked_prank_v1", "unlocked");
+      } catch (e) {}
+
+      setTimeout(() => {
+        isOpen = false;
+        isSuccess = false;
+        inputPhrase = '';
+      }, 2000);
+    } else {
+      // SALAH PASSWORD
+      attempts++;
+      isWrong = true;
+      errorMessage = funnyTaunts[(attempts - 1) % funnyTaunts.length];
+      triggerShake();
+    }
   }
 
-  function handleForgive() {
-    forgiven = true;
-    try {
-      localStorage.setItem("has_seen_apology_oct2", "true");
-    } catch (e) {}
-
-    setTimeout(() => {
-      isOpen = false;
-      forgiven = false;
-    }, 1800);
+  function triggerShake() {
+    const el = document.querySelector('.lock-card');
+    if (el) {
+      el.classList.remove('shake-anim');
+      void el.offsetWidth; // trigger reflow
+      el.classList.add('shake-anim');
+    }
   }
 
-  function handleDismiss() {
-    try {
-      localStorage.setItem("has_seen_apology_oct2", "true");
-    } catch (e) {}
-    isOpen = false;
+  function toggleClue() {
+    showClue = !showClue;
   }
 </script>
 
 {#if isOpen}
   <div
-    class="apology-backdrop"
+    class="lock-backdrop"
     role="dialog"
     aria-modal="true"
-    aria-label="Pesan Permintaan Maaf dari Maggie"
+    aria-label="Aplikasi Terkunci Butuh Password"
     tabindex="-1"
   >
-    <div class="apology-card">
-      {#if forgiven}
-        <!-- Celebration state when forgiven -->
-        <div class="forgiven-state">
-          <div class="heart-pulse-icon">😏😎</div>
-          <h3 class="forgive-title">YEEEY DIMAAFIN </h3>
+    <div class="lock-card">
+      {#if isSuccess}
+        <!-- State Berhasil Terbuka -->
+        <div class="unlock-success-box">
+          <div class="unlock-icon-anim"></div>
+          <h2 class="unlock-title">Access Granted</h2>
+          <p class="unlock-subtitle">
+             Acces granted
+          </p>
+          <div class="success-progress-bar">
+            <div class="bar-fill"></div>
+          </div>
         </div>
       {:else}
-        <!-- Main Apology Content -->
-        <div class="apology-badge">
-          <span>plsss forgive him</span>
-        </div>
+        <!-- Form Kunci Aplikasi (Prank Screen) -->
+        
+          <!-- <span>System got locked</span> -->
+        
 
-        <!-- Lottie Animation -->
-        <div class="apology-lottie-wrap">
-          <iframe
-            src="https://lottie.host/embed/85ff89ca-11d4-4df6-8db9-593e058a0b02/vpOMS56T7w.lottie"
-            title="Apology Lottie Animation"
-            class="apology-lottie-frame"
-            frameborder="0"
-          ></iframe>
-        </div>
-
-        <h3 class="apology-title">SORRYYY</h3>
-
-        <p class="apology-letter">
-          last night bener-bener <strong
-            >ngga sengaja ketiduran </strong
-          >... mata udah nggak kuat banget dan tiba-tiba langsung blank 
-        </p>
-
-        <div class="guilt-box">
-          <p class="guilt-text">
-            dont be mad, today siap nebus kesalahan
-          </p>
-        </div>
-
-        <!-- Penebus Dosa Vouchers -->
-        <!-- <div class="remedy-list">
-          <div class="remedy-item">
-            <span class="remedy-icon"></span>
-            <span class="remedy-text">Bebas palak jajan / minuman </span>
-          </div>
-          <div class="remedy-item">
-            <span class="remedy-icon"></span>
-            <span class="remedy-text">Tell him what to do</span>
-          </div>
-          <div class="remedy-item">
-            <span class="remedy-icon"></span>
-            <span class="remedy-text"
-              >Dengerin curhatan kamu all day</span
-            >
+        <!-- <div class="lock-icon-wrapper">
+          <div class="lock-big-disc">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
           </div>
         </div> -->
 
-        {#if poutCount > 0}
-          <div class="pout-notice">
-            <p>{poutResponses[poutCount - 1]}</p>
+        <h2 class="lock-heading">System Got Lock</h2>
+        <p class="lock-desc">
+          Developer has locked this page. Please enter the correct password to continue:
+        </p>
+
+        <!-- Input Form -->
+        <form class="lock-form" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <div class="input-wrapper" class:has-error={isWrong}>
+            <input
+              type={showPassword ? "text" : "password"}
+              class="pass-input"
+              placeholder="Enter password..."
+              bind:value={inputPhrase}
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="btn-eye"
+              onclick={() => showPassword = !showPassword}
+              title={showPassword ? "Sembunyikan" : "Tampilkan teks"}
+              aria-label="Toggle password view"
+            >
+              {showPassword ? "" : ""}
+            </button>
           </div>
-        {/if}
 
-        <!-- Actions -->
-        <div class="apology-actions">
-          <button type="button" class="forgive-btn" onclick={handleForgive}>
-            <span>Dimaafin dehh </span>
-          </button>
+          {#if errorMessage}
+            <div class="error-pill">
+              <span>⚠️ {errorMessage}</span>
+            </div>
+          {/if}
 
-          <button type="button" class="pout-btn" onclick={handlePout}>
-            <span>Masih agak kesel dikit 😤</span>
+          <!-- Submit Button -->
+          <button type="submit" class="btn-unlock-submit">
+            <span>Submit </span>
           </button>
-        </div>
+        </form>
+
+       
       {/if}
     </div>
   </div>
 {/if}
 
 <style>
-  .apology-backdrop {
+  .lock-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 250;
-    background: rgba(15, 23, 42, 0.68);
+    z-index: 99999;
+    background: rgba(15, 23, 42, 0.78);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--sp-4);
-    animation: fade-in 0.25s ease-out both;
+    padding: 16px;
+    box-sizing: border-box;
+    animation: fadeIn 0.25s ease-out both;
   }
 
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
-  .apology-card {
+  .lock-card {
     position: relative;
     width: 100%;
-    max-width: 390px;
-    max-height: calc(100dvh - 36px);
-    overflow-y: auto;
-    background: #ffffff;
+    max-width: 375px;
+    background: #FFFFFF;
     border-radius: 28px;
     padding: 26px 20px 22px;
     text-align: center;
-    box-shadow: 0 24px 60px rgba(0, 30, 80, 0.25);
-    animation: pop-up 0.35s cubic-bezier(0.2, 1.15, 0.3, 1) both;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    animation: popUp 0.32s cubic-bezier(0.16, 1.25, 0.3, 1) both;
     box-sizing: border-box;
-    scrollbar-width: thin;
+    font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  @keyframes pop-up {
+  @keyframes popUp {
     from {
       opacity: 0;
-      transform: scale(0.88) translateY(14px);
+      transform: scale(0.9) translateY(12px);
     }
     to {
       opacity: 1;
@@ -174,161 +195,266 @@
     }
   }
 
+  /* Shake Animation when wrong password */
+  :global(.shake-anim) {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+  }
 
-  .apology-badge {
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-3px, 0, 0); }
+    20%, 80% { transform: translate3d(5px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+    40%, 60% { transform: translate3d(5px, 0, 0); }
+  }
+
+  .lock-badge {
     display: inline-flex;
     align-items: center;
-    padding: 3px 12px;
-    border-radius: 999px;
-    background: rgba(186, 73, 101, 0.1);
-    color: #ba4965;
-    font-size: 0.7rem;
+    gap: 6px;
+    background: #FFE4E6;
+    color: #BE123C;
+    font-size: 0.68rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+
+  .lock-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #E11D48;
+    animation: pulseDot 1.5s infinite;
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
+  }
+
+  .lock-icon-wrapper {
+    display: flex;
+    justify-content: center;
     margin-bottom: 12px;
   }
 
+  .lock-big-disc {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #FFF1F2;
+    border: 2px solid #FFE4E6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(225, 29, 72, 0.15);
+  }
 
-
-  .apology-title {
-    font-family: var(--font-heading);
+  .lock-heading {
     font-size: 1.35rem;
-    color: #0f172a;
-    line-height: 1.2;
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 6px;
+    letter-spacing: -0.015em;
   }
 
-  .apology-letter {
-    font-family: var(--font-sans);
-    font-size: 0.86rem;
-    color: #475569;
+  .lock-desc {
+    font-size: 0.82rem;
+    color: #4B5563;
     line-height: 1.45;
-    margin: 0 0 12px;
-    padding: 0 4px;
+    margin: 0 0 18px;
   }
 
-  .apology-letter strong {
-    color: #be123c;
+  .lock-desc strong {
+    color: #BE123C;
+    font-weight: 800;
   }
 
-  .guilt-box {
-    width: 100%;
-    background: #fff1f2;
-    border: 1px dashed #f43f5e;
+  .lock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #F9FAFB;
+    border: 1.5px solid #E5E7EB;
     border-radius: 14px;
-    padding: 10px 12px;
-    margin-bottom: 14px;
-    box-sizing: border-box;
+    padding: 2px 8px 2px 14px;
+    transition: all 0.18s ease;
   }
 
-  .guilt-text {
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
-    color: #881337;
-    line-height: 1.35;
-    margin: 0;
+  .input-wrapper:focus-within {
+    background: #FFFFFF;
+    border-color: #BE123C;
+    box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.12);
+  }
+
+  .input-wrapper.has-error {
+    border-color: #E11D48;
+    background: #FFF1F2;
+  }
+
+  .pass-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    padding: 10px 0;
+    outline: none;
+    min-height: 40px;
+  }
+
+  .pass-input::placeholder {
+    color: #9CA3AF;
     font-weight: 500;
   }
 
-
-  .pout-notice {
-    width: 100%;
-    background: #fef3c7;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    animation: fade-in 0.2s ease-out both;
-  }
-
-  .pout-notice p {
-    font-family: var(--font-sans);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #92400e;
-    margin: 0;
-  }
-
-  .apology-actions {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .forgive-btn {
-    width: 100%;
-    padding: 13px 18px;
-    border-radius: 14px;
+  .btn-eye {
     border: none;
-    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-    color: #ffffff;
-    font-family: var(--font-sans);
-    font-size: 0.94rem;
-    font-weight: 700;
+    background: transparent;
+    font-size: 1.05rem;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(225, 29, 72, 0.28);
-    transition:
-      transform 0.15s,
-      box-shadow 0.15s;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background 0.15s;
   }
 
-  .forgive-btn:active {
+  .btn-eye:hover {
+    background: #F3F4F6;
+  }
+
+  .error-pill {
+    background: #FFE4E6;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #BE123C;
+    font-size: 0.74rem;
+    font-weight: 700;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .btn-unlock-submit {
+    width: 100%;
+    background: #111827;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 4px 14px rgba(17, 24, 39, 0.18);
+  }
+
+  .btn-unlock-submit:hover {
+    background: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.25);
+  }
+
+  .btn-unlock-submit:active {
     transform: scale(0.98);
   }
 
-  .pout-btn {
-    border: none;
-    background: transparent;
-    color: #64748b;
-    font-family: var(--font-sans);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px;
-    transition: color 0.15s;
-  }
-
-  .pout-btn:hover {
-    color: #be123c;
-  }
-
-  /* Forgiven Celebration State */
-  .forgiven-state {
-    padding: 24px 8px;
+  /* Clue Section */
+  .clue-section {
+    margin-top: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    animation: pop-up 0.3s ease-out both;
+    gap: 6px;
   }
 
-  .heart-pulse-icon {
-    font-size: 3rem;
-    animation: pulse 1s infinite alternate;
+  .btn-clue-toggle {
+    background: transparent;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6B7280;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s;
   }
 
-  @keyframes pulse {
-    from {
-      transform: scale(1);
-    }
-    to {
-      transform: scale(1.15);
-    }
+  .btn-clue-toggle:hover {
+    color: #BE123C;
   }
 
-  .forgive-title {
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    color: #be123c;
-    margin: 4px 0 0;
+  .clue-box {
+    background: #F3F4F6;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.74rem;
+    color: #374151;
+    line-height: 1.4;
+    animation: fadeIn 0.2s ease;
   }
 
-  .forgive-sub {
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
-    color: #475569;
-    line-height: 1.45;
-    margin: 0;
+  /* Success Unlocked Animation */
+  .unlock-success-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0;
+    animation: popUp 0.3s cubic-bezier(0.16, 1.25, 0.3, 1) both;
+  }
+
+  .unlock-icon-anim {
+    font-size: 3.5rem;
+    margin-bottom: 8px;
+    animation: bounceUnlock 0.8s cubic-bezier(0.2, 1.5, 0.4, 1);
+  }
+
+  @keyframes bounceUnlock {
+    0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+    60% { transform: scale(1.2) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .unlock-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+
+  .unlock-subtitle {
+    font-size: 0.82rem;
+    color: #4B5563;
+    line-height: 1.4;
+    margin: 0 0 16px;
+  }
+
+  .success-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: #10B981;
+    width: 0%;
+    animation: progressFill 1.8s linear forwards;
+  }
+
+  @keyframes progressFill {
+    from { width: 0%; }
+    to { width: 100%; }
   }
 </style>

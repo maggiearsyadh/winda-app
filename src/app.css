@@ -62,7 +62,7 @@ body {
 
 #app:has(.coming-soon-pastel-page) {
   max-width: 440px;
-  background-color: #DFECDA;
+  background-color: #FFFFFF;
   overflow-x: hidden;
 }
 

@@ -31,12 +31,12 @@
 
   $effect(() => {
     try {
-      const seen = localStorage.getItem('has_seen_apology_oct2');
-      if (!seen && (currentRoute === '#/' || currentRoute === '')) {
-        // Delay slightly for smooth page entrance
+      const unlocked = localStorage.getItem('winda_app_locked_prank_v1');
+      if (unlocked !== 'unlocked') {
+        // App is locked until unlocked by password
         const timer = setTimeout(() => {
           isApologyOpen = true;
-        }, 550);
+        }, 400);
         return () => clearTimeout(timer);
       }
     } catch (e) {}

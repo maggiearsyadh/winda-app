@@ -89,190 +89,185 @@
   }
 </script>
 
-<div class="coming-soon-pastel-page">
-  <!-- Top Welcome & Profile Navigation Header (Synced with Main Page) -->
-  <header class="app-header-sync">
-    <div class="user-row">
-      <div class="user-profile">
-        <!-- Cartoon girl avatar from Main Page -->
+<div class="workout-layout-page">
+  <!-- Top Navigation Bar (Reference Layout: Big Title on Left, Action Pill on Right) -->
+  <header class="workout-header">
+    <div class="header-left-col">
+      <div class="user-greeting-row">
         <div class="avatar-circle">
-          <svg viewBox="0 0 40 40" width="40" height="40" class="avatar-svg">
-            <!-- Background circle teal -->
+          <svg viewBox="0 0 40 40" width="36" height="36" class="avatar-svg">
             <circle cx="20" cy="20" r="19" fill="#FEA0A0" />
-            <!-- Shirt -->
             <path d="M12 38 C12 30, 28 30, 28 38" fill="#FFFFFF" stroke="#111" stroke-width="1.2" />
             <path d="M17 30 L20 34 L23 30" fill="none" stroke="#111" stroke-width="1.2" />
-            <!-- Hair Back -->
             <path d="M11 18 C10 28, 9 34, 13 36 C14 30, 14 26, 14 24" fill="#5A2E17" stroke="#111" stroke-width="1" />
             <path d="M29 18 C30 28, 31 34, 27 36 C26 30, 26 26, 26 24" fill="#5A2E17" stroke="#111" stroke-width="1" />
-            <!-- Face -->
             <ellipse cx="20" cy="20" rx="6.5" ry="7.5" fill="#FFE5D1" stroke="#111" stroke-width="1.2" />
-            <!-- Hair Front -->
             <path d="M13 18 C14 13, 26 13, 27 18 C25 15, 23 16, 20 16 C17 16, 15 15, 13 18 Z" fill="#5A2E17" stroke="#111" stroke-width="1.2" />
-            <!-- Eyes -->
             <circle cx="17.8" cy="19.5" r="0.9" fill="#111" />
             <circle cx="22.2" cy="19.5" r="0.9" fill="#111" />
-            <!-- Smile -->
             <path d="M18.8 23 C19.5 24, 20.5 24, 21.2 23" fill="none" stroke="#111" stroke-width="1" stroke-linecap="round" />
           </svg>
         </div>
-
-        <span class="greeting-text">
-          Hiiii, {couple.her || 'Winda'}
-        </span>
+        <span class="greeting-text">Hiiii, {couple.her || 'Winda'}</span>
       </div>
+      <h1 class="page-headline">Tasks</h1>
+    </div>
 
-      <!-- Action Items (Right) -->
-      <div class="header-right-tools">
-        {#if hasTrack}
-          <button
-            type="button"
-            class="header-music-disc"
-            onclick={togglePlayPause}
-            aria-label={isPlaying ? 'Jeda lagu' : 'Putar lagu'}
-            title={isPlaying ? `Memutar lagu ${currentTitle}` : 'Musik dijeda'}
-          >
-            <span class="disc-vinyl" class:is-spinning={isPlaying}>
-              💿
-            </span>
-            {#if isPlaying}
-              <span class="music-wave-dot"></span>
-            {/if}
-          </button>
-        {/if}
-
+    <div class="header-right-tools">
+      {#if hasTrack}
         <button
           type="button"
-          class="header-action-disc"
-          onclick={handleBack}
-          title="Kembali ke Beranda"
-          aria-label="Kembali ke Beranda"
+          class="round-action-btn"
+          onclick={togglePlayPause}
+          aria-label={isPlaying ? 'Jeda lagu' : 'Putar lagu'}
+          title={isPlaying ? `Memutar lagu ${currentTitle}` : 'Musik dijeda'}
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
+          <span class="disc-vinyl" class:is-spinning={isPlaying}>💿</span>
         </button>
-      </div>
+      {/if}
+
+      <button
+        type="button"
+        class="round-action-btn"
+        onclick={handleBack}
+        title="Kembali ke Beranda"
+        aria-label="Kembali ke Beranda"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
     </div>
   </header>
 
-  <!-- Big Headline: Start today's tasks. -->
-  <div class="headline-container">
-    <h1 class="start-tasks-title">
-      <span class="muted-word">Winda's</span> Task Management.
-    </h1>
-    <p class="headline-sub">
-      mau ngapain aja hari ini An?
-    </p>
-  </div>
+  <!-- 1. Top Featured Hero Card: Blue #BBE7EF Today Card (Reference: "AIDONG - Immersive sensory training") -->
+  <section class="hero-card-section">
+    <button
+      type="button"
+      class="hero-blue-card"
+      onclick={() => handleBoxClick(boxes[0])}
+      aria-label="Buka Today Task Management"
+    >
+      <!-- Top Row inside Blue Card: Translucent Badge & Round Icon -->
+      <div class="hero-top-row">
+        <span class="hero-pill-badge">TODAY</span>
 
-  <!-- 4 Boxes Grid (Exact 2x2 Layout from Reference Image) -->
-  <main class="four-boxes-grid">
-    {#each boxes as box}
-      <button
-        type="button"
-        class="stat-box-card"
-        class:is-active-box={activeBoxId === box.id}
-        onclick={() => handleBoxClick(box)}
-      >
-        <!-- Top Row: Round Icon + Title -->
-        <div class="box-top-row">
-          <div class="box-icon-disc">
-            {#if box.icon === 'calendar'}
-              <!-- Calendar Icon -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6C99" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-                <circle cx="8" cy="15" r="1" fill="#3B6C99"></circle>
-                <circle cx="12" cy="15" r="1" fill="#3B6C99"></circle>
-                <circle cx="16" cy="15" r="1" fill="#3B6C99"></circle>
-              </svg>
-            {:else if box.icon === 'users'}
-              <!-- Users / Goals Icon -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6C99" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            {:else if box.icon === 'hourglass'}
-              <!-- Hourglass Icon -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6C99" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 22h14"></path>
-                <path d="M5 2h14"></path>
-                <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
-                <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
-              </svg>
-            {:else}
-              <!-- Past Due Calendar Search Icon -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6C99" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-                <circle cx="14" cy="16" r="2.5"></circle>
-                <line x1="16" y1="18" x2="18" y2="20"></line>
-              </svg>
-            {/if}
-          </div>
-          <span class="box-title-text">{box.title}</span>
+        <div class="hero-icon-disc">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F3302" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <circle cx="8" cy="15" r="1" fill="#1F3302"></circle>
+            <circle cx="12" cy="15" r="1" fill="#1F3302"></circle>
+            <circle cx="16" cy="15" r="1" fill="#1F3302"></circle>
+          </svg>
         </div>
+      </div>
 
-        <!-- Bottom Row: Count + Label -->
-        <div class="box-bottom-stat">
-          <span class="box-count-number">{box.id === 'today' ? (taskCount ? String(taskCount).padStart(2, '0') : box.count) : box.count}</span>
-          <span class="box-unit-label">{box.label}</span>
-        </div>
+      <!-- Main Text in Blue Card -->
+      <div class="hero-body">
+        <h2 class="hero-title">
+          {taskCount ? String(taskCount).padStart(2, '0') : '04'} Active Tasks
+        </h2>
+        <p class="hero-subtitle">
+          To-Do List &bull; mau ngapain aja hari ini An?
+        </p>
+      </div>
 
-        <!-- Subtle Organic Wave in Background (Matching image) -->
-        <div class="card-wave-bg"></div>
-      </button>
-    {/each}
-  </main>
-
-  <!-- Bottom Tasks Section (Matching Image 2) -->
-  <section class="bottom-tasks-section">
-    <div class="section-header-row">
-      <h2 class="section-title-text">Today's tasks</h2>
-      <a href="#/kanban" class="view-all-link">View All</a>
-    </div>
-
-    <!-- Active Task Card (Exec Oversight style) -->
-    <div class="exec-task-card">
-      <div class="exec-card-left">
-        <span class="task-time-badge">All Day</span>
-        <h3 class="exec-task-title">Winda's Total Task</h3>
-        <p class="exec-task-subtitle">See total task</p>
-
-        <a href="#/kanban" class="open-kanban-link">
-          <span>Kanban Board</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Bottom action prompt inside Blue Card -->
+      <div class="hero-footer-row">
+        <span class="hero-action-link">
+          <span>Buka Kanban Board</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
-        </a>
+        </span>
       </div>
 
-      <!-- Multiple User Avatars (Right) -->
-      <div class="exec-card-avatars">
-        <div class="mini-overlap-avatar avatar-1">
-          <svg viewBox="0 0 32 32" width="32" height="32">
-            <circle cx="16" cy="16" r="15" fill="#E8B4B8" />
-            <circle cx="16" cy="13" r="6" fill="#6B3322" />
-            <path d="M8 28 C8 21, 24 21, 24 28" fill="#F87171" />
-          </svg>
-        </div>
-        <div class="mini-overlap-avatar avatar-2">
-          <svg viewBox="0 0 32 32" width="32" height="32">
-            <circle cx="16" cy="16" r="15" fill="#C5D3E8" />
-            <circle cx="16" cy="13" r="6" fill="#1E293B" />
-            <path d="M8 28 C8 21, 24 21, 24 28" fill="#3B82F6" />
-          </svg>
-        </div>
+      <!-- Soft Decorative Organic Waves (Reference style) -->
+      <div class="hero-wave-deco"></div>
+    </button>
+  </section>
+
+  <!-- 2. Middle Card: Workout Progress Style Overview Card (Reference: "Workout Progress 12 Exercise left [75%]") -->
+  <section class="progress-section">
+    <a href="#/kanban" class="progress-overview-card">
+      <div class="progress-text-col">
+        <h3 class="progress-title">Winda's Total Task</h3>
+        <p class="progress-subtitle">
+          {taskCount ? taskCount : 0} Tasks recorded &bull; Priority tracking
+        </p>
       </div>
+
+      <!-- Circular Progress Ring (Matches the 75% teal ring in reference) -->
+      <div class="progress-ring-box">
+        <svg viewBox="0 0 44 44" class="progress-ring-svg">
+          <circle cx="22" cy="22" r="17" class="ring-bg" />
+          <circle cx="22" cy="22" r="17" class="ring-active" stroke-dasharray="106.8" stroke-dashoffset="26.7" />
+        </svg>
+        <span class="progress-percent-val">75%</span>
+      </div>
+    </a>
+  </section>
+
+  <!-- 3. Bottom Section: Muscles Workload Style Grid (Reference: "Muscles workload" 2-col cards) -->
+  <section class="workload-section">
+    <div class="workload-heading-row">
+      <h2 class="workload-title">Feature & Tools</h2>
+      <p class="workload-sub">Pilih fitur atau alat bantu yang ingin digunakan</p>
+    </div>
+
+    <!-- 2-Column Grid of rounded cards (Excel, Calculator, Podomoro) -->
+    <div class="workload-grid">
+      {#each boxes.slice(1) as box}
+        <button
+          type="button"
+          class="workload-card"
+          onclick={() => handleBoxClick(box)}
+        >
+          <!-- Center Illustration / Icon Canvas -->
+          <div class="card-icon-canvas">
+            <div class="icon-round-disc">
+              {#if box.icon === 'users'}
+                <!-- Excel / Users Icon -->
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              {:else if box.icon === 'hourglass'}
+                <!-- Calculator / Hourglass Icon -->
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 22h14"></path>
+                  <path d="M5 2h14"></path>
+                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                </svg>
+              {:else}
+                <!-- Podomoro / Timer Calendar Icon -->
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                  <circle cx="14" cy="16" r="2.5"></circle>
+                  <line x1="16" y1="18" x2="18" y2="20"></line>
+                </svg>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Bottom Card Labels -->
+          <div class="card-bottom-labels">
+            <h3 class="card-title-text">{box.title}</h3>
+            <span class="card-count-pill">{box.count} {box.label} &bull; {box.sub}</span>
+          </div>
+        </button>
+      {/each}
     </div>
   </section>
 
@@ -289,71 +284,71 @@
 </div>
 
 <style>
-  /* ── Pastel Green Page Canvas (Exact match to reference style) ── */
-  .coming-soon-pastel-page {
+  /* ── Page Canvas (Clean White Matching Reference) ── */
+  .workout-layout-page {
     width: 100%;
     max-width: 100%;
     min-height: 100dvh;
-    padding: max(var(--sp-4), var(--sat)) 16px max(90px, var(--sab));
+    padding: max(var(--sp-4), var(--sat)) 18px max(96px, var(--sab));
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    background-color: #DFECDA; /* Pastel Green Background Requested */
+    background-color: #FFFFFF;
     font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
-    animation: pastel-fade-in 0.25s ease-out;
+    animation: fadeInPage 0.22s ease-out;
     position: relative;
     overflow-x: hidden;
   }
 
-  .coming-soon-pastel-page :global(*),
-  .coming-soon-pastel-page button,
-  .coming-soon-pastel-page h1,
-  .coming-soon-pastel-page h2,
-  .coming-soon-pastel-page h3,
-  .coming-soon-pastel-page span,
-  .coming-soon-pastel-page p,
-  .coming-soon-pastel-page a {
+  .workout-layout-page :global(*),
+  .workout-layout-page button,
+  .workout-layout-page h1,
+  .workout-layout-page h2,
+  .workout-layout-page h3,
+  .workout-layout-page span,
+  .workout-layout-page p,
+  .workout-layout-page a {
     font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  @keyframes pastel-fade-in {
+  @keyframes fadeInPage {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-
-  /* ── Header Synced with Main Page ── */
-  .app-header-sync {
-    padding: 0 0 16px 0;
+  /* ── Header: Top Navigation (Workout Title + Action Disc) ── */
+  .workout-header {
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
     width: 100%;
     box-sizing: border-box;
   }
 
-  .user-row {
+  .header-left-col {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .user-profile {
+  .user-greeting-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    margin-bottom: 2px;
   }
 
   .avatar-circle {
-    width: 44px;
-    height: 44px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   }
 
   .avatar-svg {
@@ -363,49 +358,55 @@
   }
 
   .greeting-text {
-    font-size: 0.88rem;
+    font-size: 0.84rem;
     font-weight: 700;
-    color: #111827;
+    color: #4A5568;
     letter-spacing: -0.01em;
+  }
+
+  .page-headline {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
   }
 
   .header-right-tools {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding-top: 4px;
   }
 
-  .header-action-disc,
-  .header-music-disc {
-    width: 38px;
-    height: 38px;
+  .round-action-btn {
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: #FFFFFF;
-    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .header-action-disc:hover,
-  .header-music-disc:hover {
-    transform: scale(1.08);
+  .round-action-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .header-action-disc:active,
-  .header-music-disc:active {
+  .round-action-btn:active {
     transform: scale(0.95);
   }
 
   .disc-vinyl {
     font-size: 1.15rem;
     display: inline-block;
-    transition: transform 0.2s ease;
   }
 
   .disc-vinyl.is-spinning {
@@ -417,286 +418,331 @@
     to { transform: rotate(360deg); }
   }
 
-  .music-wave-dot {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10B981;
-    border: 1.5px solid #FFFFFF;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  /* ── Big Headline: Start today's tasks. ── */
-  .headline-container {
-    margin-bottom: 18px;
-  }
-
-  .start-tasks-title {
-    font-size: 1.62rem;
-    font-weight: 700;
-    color: #18181B;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-    margin: 0 0 4px;
-    word-break: normal;
-  }
-
-  .muted-word {
-    color: #557549; /* Soft tint of green matching pastel palette */
-    opacity: 0.85;
-  }
-
-  .headline-sub {
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #4A5F45;
-    margin: 0;
-  }
-
-  /* ── 4 Boxes Grid: Exact Replica of Image 2 ── */
-  .four-boxes-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 22px;
+  /* ── 1. Hero Blue Card (#BBE7EF) – Exact match to reference top card ── */
+  .hero-card-section {
     width: 100%;
-    box-sizing: border-box;
+    margin-bottom: 16px;
   }
 
-  .stat-box-card {
-    background: #f6fff6;
+  .hero-blue-card {
+    width: 100%;
+    background: #AED035;
     border: none;
-    border-radius: 20px;
-    padding: 13px 11px 11px;
-    min-height: 126px;
+    border-radius: 28px;
+    padding: 22px 20px 20px;
+    min-height: 168px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 4px 16px rgba(45, 65, 40, 0.04);
+    box-shadow: 0 10px 28px rgba(125, 160, 20, 0.22);
     cursor: pointer;
     text-align: left;
     position: relative;
     overflow: hidden;
-    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
     box-sizing: border-box;
-    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .stat-box-card:hover {
+  .hero-blue-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(45, 65, 40, 0.08);
+    box-shadow: 0 14px 34px rgba(125, 160, 20, 0.3);
   }
 
-  .stat-box-card:active {
-    transform: scale(0.97);
+  .hero-blue-card:active {
+    transform: scale(0.985);
   }
 
-  .stat-box-card.is-active-box {
-    box-shadow: 0 6px 20px rgba(45, 65, 40, 0.09), inset 0 0 0 1.5px #6D9C3F;
-  }
-
-  /* Subtle Organic Wave Watermark Inside Card (Image 2 style) */
-  .card-wave-bg {
-    position: absolute;
-    right: -20px;
-    bottom: -20px;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(223, 236, 218, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
-    pointer-events: none;
-  }
-
-  /* Top Row inside Card */
-  .box-top-row {
+  .hero-top-row {
     display: flex;
-    align-items: flex-start;
-    gap: 7px;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
-    z-index: 1;
-    min-width: 0;
-    width: 100%;
+    z-index: 2;
+    margin-bottom: 14px;
   }
 
-  .box-icon-disc {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
+  .hero-pill-badge {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #1F3003;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .hero-icon-disc {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: #EDF4EA;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(26, 48, 4, 0.1);
+  }
+
+  .hero-body {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #162402;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+  }
+
+  .hero-subtitle {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #2E4506;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .hero-footer-row {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #162402;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 5px 12px;
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    transition: background 0.15s;
+  }
+
+  .hero-blue-card:hover .hero-action-link {
+    background: #FFFFFF;
+  }
+
+  /* Decorative soft circle waves matching reference */
+  .hero-wave-deco {
+    position: absolute;
+    right: -30px;
+    top: -20px;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(174, 208, 53, 0) 75%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── 2. Progress Overview Card (Reference: "Workout Progress 12 Exercise left [75%]") ── */
+  .progress-section {
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .progress-overview-card {
+    background: #f5f0e9;
+    border-radius: 22px;
+    border: 1px solid #ECE2D5;
+    padding: 16px 18px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .progress-overview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .progress-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .progress-subtitle {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  /* Circular Ring */
+  .progress-ring-box {
+    width: 44px;
+    height: 44px;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: 1px;
   }
 
-  .box-title-text {
-    font-size: 0.77rem;
-    font-weight: 700;
-    color: #18181B;
-    line-height: 1.25;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-    flex: 1;
-    min-width: 0;
+  .progress-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
   }
 
-  /* Bottom Row inside Card: Count + Label */
-  .box-bottom-stat {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    margin-top: auto;
-    position: relative;
-    z-index: 1;
+  .ring-bg {
+    fill: none;
+    stroke: #E2D7C8;
+    stroke-width: 3.5;
   }
 
-  .box-count-number {
-    font-size: 1.85rem;
-    font-weight: 700;
-    color: #18181B;
-    line-height: 1;
-    letter-spacing: -0.03em;
+  .ring-active {
+    fill: none;
+    stroke: #92B919;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease;
   }
 
-  .box-unit-label {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #71717A;
+  .progress-percent-val {
+    position: absolute;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #273A05;
   }
 
-  /* ── Bottom Section: Today's tasks + Exec Oversight Card ── */
-  .bottom-tasks-section {
+  /* ── 3. Bottom Section: Muscles Workload Grid (Reference Layout) ── */
+  .workload-section {
+    width: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  .workload-heading-row {
+    margin-bottom: 14px;
+  }
+
+  .workload-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.015em;
+    margin: 0 0 3px;
+  }
+
+  .workload-sub {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  .workload-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     width: 100%;
     box-sizing: border-box;
   }
 
-  .section-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
-  }
-
-  .section-title-text {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #18181B;
-    letter-spacing: -0.01em;
-    margin: 0;
-  }
-
-  .view-all-link {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #436137;
-    text-decoration: none;
-    transition: opacity 0.15s;
-  }
-
-  .view-all-link:hover {
-    opacity: 0.75;
-  }
-
-  /* White Bottom Task Card */
-  .exec-task-card {
-    background: #FFFFFF;
-    border-radius: 26px;
-    padding: 20px 20px;
-    box-shadow: 0 6px 24px rgba(45, 65, 40, 0.05);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    box-sizing: border-box;
-    transition: transform 0.15s;
-  }
-
-  .exec-task-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .exec-card-left {
+  .workload-card {
+    background: #FAF7F2;
+    border: 1px solid #ECE4D8;
+    border-radius: 22px;
+    padding: 16px 12px 14px;
+    min-height: 146px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    flex: 1;
-  }
-
-  .task-time-badge {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #557549;
-    letter-spacing: 0.02em;
-  }
-
-  .exec-task-title {
-    font-size: 1.18rem;
-    font-weight: 800;
-    color: #18181B;
-    letter-spacing: -0.015em;
-    margin: 0;
-    line-height: 1.25;
-  }
-
-  .exec-task-subtitle {
-    font-size: 0.8rem;
-    color: #71717A;
-    margin: 0 0 10px;
-  }
-
-  .open-kanban-link {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    background: #DFECDA;
-    color: #2F4D24;
-    font-size: 0.74rem;
-    font-weight: 800;
-    text-decoration: none;
-    width: fit-content;
-    transition: background 0.15s, transform 0.15s;
+    justify-content: space-between;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, background 0.18s, border-color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .open-kanban-link:hover {
-    background: #CFE2C8;
-    transform: translateX(2px);
+  .workload-card:hover {
+    transform: translateY(-2px);
+    background: #FFFFFF;
+    box-shadow: 0 10px 24px rgba(174, 208, 53, 0.2);
+    border-color: #AED035;
   }
 
-  .exec-card-avatars {
+  .workload-card:active {
+    transform: scale(0.97);
+  }
+
+  .card-icon-canvas {
+    flex: 1;
     display: flex;
     align-items: center;
-    position: relative;
-    flex-shrink: 0;
-    padding-top: 6px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 8px;
   }
 
-  .mini-overlap-avatar {
-    width: 32px;
-    height: 32px;
+  .icon-round-disc {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    border: 2px solid #FFFFFF;
-    overflow: hidden;
-    background: #E4E4E7;
+    background: #FFFFFF;
+    border: 1px solid #EAE3D6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: transform 0.18s ease, border-color 0.18s ease;
   }
 
-  .avatar-2 {
-    margin-left: -10px;
+  .workload-card:hover .icon-round-disc {
+    transform: scale(1.08);
+    border-color: #AED035;
+  }
+
+  .card-bottom-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+  }
+
+  .card-title-text {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .card-count-pill {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #6B7280;
+    line-height: 1.25;
+    margin-top: 2px;
   }
 
   /* ── Notification Banner Toast ── */
@@ -710,21 +756,14 @@
     background: #FFFFFF;
     border-radius: 16px;
     padding: 12px 16px;
-    border: none;
+    border: 1px solid #E5E7EB;
     text-align: left;
     font-family: inherit;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     display: flex;
     align-items: center;
     gap: 12px;
     z-index: 9999;
-    cursor: pointer;
-    animation: toastPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @keyframes toastPop {
-    from { opacity: 0; transform: translate(-50%, 15px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
   }
 
   .notif-bell-icon {
@@ -732,15 +771,15 @@
   }
 
   .notif-text-wrap strong {
-    font-size: 0.85rem;
-    color: #18181B;
     display: block;
+    font-size: 0.84rem;
+    color: #111827;
     margin-bottom: 2px;
   }
 
   .notif-text-wrap p {
     font-size: 0.74rem;
-    color: #71717A;
+    color: #6B7280;
     margin: 0;
     line-height: 1.35;
   }
