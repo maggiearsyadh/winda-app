@@ -70,14 +70,9 @@
 
   <!-- Navigation Row -->
   <div class="nav-row">
-    <!-- <a href="#/kanban" class="nav-pill kanban-pill" aria-label="Buka Focus Board Kanban">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="9" y1="3" x2="9" y2="21"></line>
-        <line x1="15" y1="3" x2="15" y2="21"></line>
-      </svg>
-      <span>to-do-list</span>
-    </a> -->
+    <a href="#/period" class="nav-pill period-pill" aria-label="Buka Pelacak Siklus Haid">
+      <span> Siklus Haid</span>
+    </a>
   </div>
 </header>
 
@@ -204,11 +199,14 @@
     transform: scale(0.96);
   }
 
-  .nav-pill.kanban-pill {
-    background: #6D9C3F;
-    color: #FFFFFF;
-    border-color: #6D9C3F;
-    box-shadow: 0 4px 12px rgba(78, 130, 180, 0.25);
+  .nav-pill.period-pill {
+    background: #FFF1F2;
+    color: #BE123C;
+    border-color: #FECDD3;
+  }
+
+  .nav-pill.period-pill:hover {
+    background: #FFE4E6;
   }
 
   .new-dot {

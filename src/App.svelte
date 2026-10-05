@@ -8,6 +8,7 @@
   import CarouselDots    from '$lib/components/CarouselDots.svelte';
   import ComingSoonPage  from '$lib/components/ComingSoonPage.svelte';
   import KanbanBoard     from '$lib/components/KanbanBoard.svelte';
+  import PeriodTrackerPage from '$lib/components/PeriodTrackerPage.svelte';
 
   // Interactive Modals & Floating Tools
   import MoodModal       from '$lib/components/MoodModal.svelte';
@@ -62,6 +63,9 @@
   {:else if currentRoute === '#/kanban'}
     <!-- Dedicated Kanban Board View -->
     <KanbanBoard onBack={goHome} />
+  {:else if currentRoute === '#/period'}
+    <!-- Dedicated Period Tracker Page View -->
+    <PeriodTrackerPage onBack={goHome} />
   {:else}
     <!-- Top Header Navigation -->
     <Header />

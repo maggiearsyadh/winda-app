@@ -60,7 +60,8 @@ body {
   overflow-x: hidden;
 }
 
-#app:has(.coming-soon-pastel-page) {
+#app:has(.coming-soon-pastel-page),
+#app:has(.period-tracker-page) {
   max-width: 440px;
   background-color: #FFFFFF;
   overflow-x: hidden;
