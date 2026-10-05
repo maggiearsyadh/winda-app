@@ -713,16 +713,10 @@
  transform="rotate(-90 55 55)"
  class="water-progress-ring"
  />
- <!-- Water Droplet Minimal SVG Icon in Center -->
- <path
- d="M 55 24 C 55 24 43 40 43 49 C 43 56 48.4 61 55 61 C 61.6 61 67 56 67 49 C 67 40 55 24 55 24 Z"
- fill="#0284C7"
- opacity="0.9"
- />
- <!-- Inner Water Wave / Drop Highlight -->
- <circle cx="58" cy="46" r="2.5" fill="#BAE6FD" />
+ <!-- Water Droplet Emoji in Center -->
+      <text x="55" y="47" text-anchor="middle" dominant-baseline="central" font-size="28" class="water-emoji-icon">💧</text>
 
- <!-- Counter Display Under Droplet -->
+<!-- Counter Display Under Droplet -->
  <text x="55" y="76" text-anchor="middle" class="water-card-count">
  {loggedWaterCups}/8 Gelas
  </text>
@@ -1455,18 +1449,7 @@
  onclick={() => setWaterCups(i + 1)}
  title={`Gelas ke-${i + 1}`}
  >
- <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
- <path
- d="M5 4L7.5 20C7.7 20.6 8.3 21 9 21H15C15.7 21 16.3 20.6 16.5 20L19 4H5Z"
- fill={i < loggedWaterCups ? '#38BDF8' : '#F1F5F9'}
- stroke={i < loggedWaterCups ? '#0284C7' : '#CBD5E1'}
- stroke-width="1.8"
- stroke-linejoin="round"
- />
- {#if i < loggedWaterCups}
- <path d="M7 9C8 8.5 10 9.5 12 9C14 8.5 16 9.5 17 9" stroke="#E0F2FE" stroke-width="1.5" stroke-linecap="round" />
- {/if}
- </svg>
+ <span class="cup-emoji">🥛</span>
  <span class="cup-label">{i + 1}</span>
  </button>
  {/each}
@@ -3200,7 +3183,26 @@
  gap: 8px;
  margin-bottom: 16px;
  }
- .water-cup-btn {
+ .water-emoji-icon {
+    user-select: none;
+    pointer-events: none;
+  }
+  .water-cup-btn .cup-emoji {
+    font-size: 1.55rem;
+    line-height: 1;
+    filter: grayscale(100%);
+    opacity: 0.38;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .water-cup-btn.is-filled .cup-emoji {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  .water-cup-btn {
  background: #F8FAFC;
  border: 1px solid #E2E8F0;
  border-radius: 14px;
