@@ -45,29 +45,22 @@
       isActiveFeature: true
     },
     {
-      id: 'goals',
-      title: 'Excel (coming soon)',
-      count: '0',
-      label: 'Task',
-      icon: 'users',
-      sub: 'Timer Pomodoro 25m',
-      isActiveFeature: false
-    },
-    {
-      id: 'on_hold',
+      id: 'calculator',
       title: 'Calculator Scientific',
       count: '0',
       label: 'Task',
-      icon: 'hourglass',
+      badge: 'SOON',
+      svgIcon: '/winda_stumble.svg',
       sub: 'Kalkulator BEP & Margin',
       isActiveFeature: false
     },
     {
-      id: 'past_due',
+      id: 'podomoro',
       title: 'Podomoro',
       count: '0',
       label: 'Task',
-      icon: 'search_calendar',
+      badge: 'SOON',
+      svgIcon: '/stumble_maggie.svg',
       sub: 'Ide Fitur Baru',
       isActiveFeature: false
     }
@@ -193,17 +186,17 @@
   </section>
 
   <!-- 2. Middle Card: Workout Progress Style Overview Card (Reference: "Workout Progress 12 Exercise left [75%]") -->
-  <section class="progress-section">
+  <!-- <section class="progress-section">
     <a href="#/kanban" class="progress-overview-card">
       <div class="progress-text-col">
         <h3 class="progress-title">Winda's Total Task</h3>
         <p class="progress-subtitle">
           {taskCount ? taskCount : 0} Tasks recorded &bull; Priority tracking
         </p>
-      </div>
+      </div> -->
 
       <!-- Circular Progress Ring (Matches the 75% teal ring in reference) -->
-      <div class="progress-ring-box">
+      <!-- <div class="progress-ring-box">
         <svg viewBox="0 0 44 44" class="progress-ring-svg">
           <circle cx="22" cy="22" r="17" class="ring-bg" />
           <circle cx="22" cy="22" r="17" class="ring-active" stroke-dasharray="106.8" stroke-dashoffset="26.7" />
@@ -211,7 +204,7 @@
         <span class="progress-percent-val">75%</span>
       </div>
     </a>
-  </section>
+  </section> -->
 
   <!-- 3. Bottom Section: Muscles Workload Style Grid (Reference: "Muscles workload" 2-col cards) -->
   <section class="workload-section">
@@ -220,7 +213,7 @@
       <p class="workload-sub">Pilih fitur atau alat bantu yang ingin digunakan</p>
     </div>
 
-    <!-- 2-Column Grid of rounded cards (Excel, Calculator, Podomoro) -->
+    <!-- 2-Column Grid of 3D Pop-Out Cards (Catalog Reference Style) -->
     <div class="workload-grid">
       {#each boxes.slice(1) as box}
         <button
@@ -228,43 +221,44 @@
           class="workload-card"
           onclick={() => handleBoxClick(box)}
         >
-          <!-- Center Illustration / Icon Canvas -->
-          <div class="card-icon-canvas">
-            <div class="icon-round-disc">
-              {#if box.icon === 'users'}
-                <!-- Excel / Users Icon -->
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-              {:else if box.icon === 'hourglass'}
-                <!-- Calculator / Hourglass Icon -->
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 22h14"></path>
-                  <path d="M5 2h14"></path>
-                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
-                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
-                </svg>
-              {:else}
-                <!-- Podomoro / Timer Calendar Icon -->
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Top Right Badge (Matches -5% pill in reference) -->
+          {#if box.badge}
+            <span class="card-badge">{box.badge}</span>
+          {/if}
+
+          <!-- Character Illustration: Pops out crossing over the top border -->
+          {#if box.svgIcon}
+            <div class="card-character-stage">
+              <img
+                src={box.svgIcon}
+                alt={box.title}
+                class="popout-character-img"
+              />
+            </div>
+          {:else}
+            <div class="card-icon-canvas">
+              <div class="icon-round-disc">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3E5C06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
-                  <circle cx="14" cy="16" r="2.5"></circle>
-                  <line x1="16" y1="18" x2="18" y2="20"></line>
                 </svg>
-              {/if}
+              </div>
             </div>
-          </div>
+          {/if}
 
-          <!-- Bottom Card Labels -->
+          <!-- Bottom Card Labels: Title and Subtitle -->
           <div class="card-bottom-labels">
             <h3 class="card-title-text">{box.title}</h3>
-            <span class="card-count-pill">{box.count} {box.label} &bull; {box.sub}</span>
+            <span class="card-sub-text">{box.sub}</span>
+          </div>
+
+          <!-- Bottom Floating Action Button (Matches round heart disc in reference) -->
+          <div class="card-bottom-action-disc" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#18181B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
           </div>
         </button>
       {/each}
@@ -661,75 +655,116 @@
   .workload-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    column-gap: 14px;
+    row-gap: 48px;
+    margin-top: 52px;
+    margin-bottom: 24px;
     width: 100%;
     box-sizing: border-box;
   }
 
   .workload-card {
-    background: #FAF7F2;
-    border: 1px solid #ECE4D8;
-    border-radius: 22px;
-    padding: 16px 12px 14px;
-    min-height: 146px;
+    background: #FFFFFF;
+    border: 1.5px solid #F0ECE4;
+    border-radius: 26px;
+    padding: 0 12px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     text-align: center;
     cursor: pointer;
     box-sizing: border-box;
-    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, background 0.18s, border-color 0.18s ease;
+    position: relative;
+    overflow: visible;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
     -webkit-tap-highlight-color: transparent;
   }
 
   .workload-card:hover {
-    transform: translateY(-2px);
-    background: #FFFFFF;
-    box-shadow: 0 10px 24px rgba(174, 208, 53, 0.2);
-    border-color: #AED035;
+    transform: translateY(-4px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+    border-color: #E2DDD3;
   }
 
   .workload-card:active {
     transform: scale(0.97);
   }
 
+  /* Badge in top right corner (like -5% / -10% in reference) */
+  .card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #18181B;
+    color: #FFFFFF;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    z-index: 4;
+  }
+
+  /* Stage where the character stands and pops out over the top border */
+  .card-character-stage {
+    position: relative;
+    width: 100%;
+    height: 108px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: -48px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .popout-character-img {
+    height: 138px;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.14));
+    transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .workload-card:hover .popout-character-img {
+    transform: translateY(-5px) scale(1.06);
+  }
+
   .card-icon-canvas {
-    flex: 1;
+    width: 100%;
+    height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    margin-bottom: 8px;
+    margin-top: 10px;
+    margin-bottom: 6px;
   }
 
   .icon-round-disc {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: #FFFFFF;
     border: 1px solid #EAE3D6;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: transform 0.18s ease, border-color 0.18s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
-  .workload-card:hover .icon-round-disc {
-    transform: scale(1.08);
-    border-color: #AED035;
-  }
-
+  /* Labels */
   .card-bottom-labels {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     width: 100%;
+    margin-top: 10px;
+    z-index: 2;
   }
 
   .card-title-text {
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     font-weight: 800;
     color: #111827;
     margin: 0;
@@ -737,12 +772,36 @@
     word-break: break-word;
   }
 
-  .card-count-pill {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #6B7280;
+  .card-sub-text {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #4B5563;
     line-height: 1.25;
     margin-top: 2px;
+  }
+
+  /* Floating round heart button overlapping bottom border (like reference) */
+  .card-bottom-action-disc {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid #ECE7DE;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .workload-card:hover .card-bottom-action-disc {
+    transform: translateX(-50%) scale(1.1);
+    background: #FAF7F2;
   }
 
   /* ── Notification Banner Toast ── */
