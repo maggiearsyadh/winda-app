@@ -138,7 +138,7 @@ export async function syncAllCyclesToSupabase(cycles) {
  * @param {string} cycleId
  */
 export async function deleteCycleFromSupabase(cycleId) {
-  if (!cycleId) return;
+  if (!cycleId || !isValidUUID(cycleId)) return;
   try {
     const { error } = await supabase.from('period_cycles').delete().eq('id', cycleId);
     if (error) {

@@ -103,9 +103,20 @@ export function loadPeriodStore() {
  * Create fresh default store data.
  * @returns {PeriodStoreData}
  */
+export function generateCycleId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 /**
- * Sanitize and merge duplicate/overlapping cycles.
- * Keeps cycles ordered and eliminates duplicate entries within standard cycle intervals (<18 days).
+ * Sanitize and deduplicate cycles without destructively corrupting valid distinct intervals.
+ * Only merges genuine duplicates (same start date) or directly overlapping periods.
  * @param {Array<{id: string, start: string, end: string|null}>} rawCycles
  * @returns {Array<{id: string, start: string, end: string|null}>}
  */
@@ -121,14 +132,20 @@ export function sanitizeCycles(rawCycles) {
       continue;
     }
     const prev = result[result.length - 1];
-    const diff = Math.abs(diffDays(prev.start, curr.start));
-    if (diff < 18) {
-      // Keep earlier start date (e.g. 2026-10-01)
-      prev.start = prev.start < curr.start ? prev.start : curr.start;
+
+    // If identical start date: merge duplicate
+    if (prev.start === curr.start) {
       prev.end = curr.end || prev.end;
-    } else {
-      result.push({ ...curr });
+      continue;
     }
+
+    // If prev has an end date, and curr starts before or on prev.end (direct date overlap)
+    if (prev.end && curr.start <= prev.end) {
+      prev.end = curr.end && curr.end > prev.end ? curr.end : prev.end;
+      continue;
+    }
+
+    result.push({ ...curr });
   }
   return result;
 }
@@ -167,7 +184,7 @@ export function savePeriodStore(store) {
  */
 export function startCycle(cycles, startIso = todayISO()) {
   if (!cycles || cycles.length === 0) {
-    return [{ id: 'cycle_' + Date.now(), start: startIso, end: null }];
+    return [{ id: generateCycleId(), start: startIso, end: null }];
   }
 
   const sorted = [...cycles].sort((a, b) => a.start.localeCompare(b.start));
@@ -200,7 +217,7 @@ export function startCycle(cycles, startIso = todayISO()) {
   }
 
   const newCycle = {
-    id: 'cycle_' + Date.now(),
+    id: generateCycleId(),
     start: startIso,
     end: null
   };

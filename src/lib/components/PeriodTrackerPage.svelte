@@ -4,7 +4,7 @@
  import { togglePlayPause, subscribeAudio } from '$lib/audioManager.js';
  import { todayISO, toISO, parseISO, addDays, diffDays, formatDateIndo } from '$lib/period/dateUtils.js';
  import { computeStats, predictCycle, getDayStatus } from '$lib/period/cycleEngine.js';
- import { loadPeriodStore, savePeriodStore, startCycle, endCycle, sanitizeCycles } from '$lib/period/periodStore.js';
+ import { loadPeriodStore, savePeriodStore, startCycle, endCycle, sanitizeCycles, generateCycleId } from '$lib/period/periodStore.js';
 	import { fetchPeriodDataFromSupabase, syncAllCyclesToSupabase, deleteCycleFromSupabase, syncDailyLogToSupabase, syncSettingsToSupabase } from '$lib/period/periodSync.js';
 
  let { onBack } = $props();
@@ -34,6 +34,11 @@
  let isDatePickerOpen = $state(false);
  let isHistoryModalOpen = $state(false);
  let modalStartDate = $state('');
+	let modalEndDate = $state('');
+	let isPeriodOngoingCheckbox = $state(true);
+	let editingCycleId = $state(null);
+	let datePickerModalTitle = $state('Atur Tanggal Menstruasi');
+	let returnToHistoryModalAfterDatePick = $state(false);
 
  // Daily log state for active selected date
  let selectedFlow = $state('medium'); // 'light' | 'medium' | 'heavy' | null
@@ -45,8 +50,7 @@
  let partnerAlertToast = $state('');
 
  // Hydration Tracker & Self-Care Modal (Recommendation 3)
- let isWaterModalOpen = $state(false);
- let loggedWaterCups = $state(4); // default 4 glasses (1000ml)
+  let loggedWaterCups = $state(4); // default 4 glasses (1000ml)
 
  // Daily Health Journal Modal (Recommendation 2 ala Clue & Apple Health)
  let isJournalModalOpen = $state(false);
@@ -149,7 +153,7 @@
  icon: '',
  badgeColor: '#F3E8FF',
  textColor: '#7E22CE',
- description: 'Hormon progesteron dominan. Jika tidak dibuahi, korpus luteum menyusut, kadar hormon turun, dan tubuh kembali masuk ke fase menstruasi.',
+ description: 'Hormon progesteron dominan. korpus luteum menyusut, kadar hormon turun, dan tubuh kembali masuk ke fase menstruasi.',
  tips: 'Fase rawan mood swing, kembung, dan ngidam makanan manis. Luangkan waktu santai.',
  food: 'Camilan manis secukupnya, teh chamomile, dan pisang.'
  }
@@ -208,6 +212,87 @@
 		});
 
 		return list.slice(0, 3);
+	});
+
+	// ── Cycle Length Chart State (Soft Pink Capsule Trend) ──
+	let activeChartIndex = $state(null);
+	let selectedCycleFilterCount = $state(5); // Default 5 bar
+	let chartPageOffset = $state(0); // 0 = siklus paling baru
+
+	let chartCycleList = $derived.by(() => {
+		const sorted = [...cycles].sort((a, b) => a.start.localeCompare(b.start));
+		const items = [];
+
+		for (let i = 0; i < sorted.length; i++) {
+			const c = sorted[i];
+			const next = sorted[i + 1];
+			let days = 28;
+			let rangeLabel = '';
+			if (next) {
+				days = Math.max(1, diffDays(c.start, next.start));
+				rangeLabel = `${formatDateIndo(c.start, 'short')} - ${formatDateIndo(next.start, 'short')}`;
+			} else {
+				days = stats.avgCycleLength || settings.cycleLength || 31;
+				rangeLabel = `${formatDateIndo(c.start, 'short')} - ${c.end ? formatDateIndo(c.end, 'short') : 'Sekarang'}`;
+			}
+
+			const d = parseISO(c.start);
+			const monthsIndo = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+			const monthName = monthsIndo[d.getMonth()] || "Siklus";
+
+			items.push({
+				id: c.id,
+				days,
+				rangeLabel,
+				month: monthName
+			});
+		}
+
+		return items;
+	});
+
+	let visibleChartCycleList = $derived.by(() => {
+		if (chartCycleList.length === 0) return [];
+		if (selectedCycleFilterCount === 999 || selectedCycleFilterCount >= chartCycleList.length) {
+			return chartCycleList;
+		}
+		const limit = selectedCycleFilterCount;
+		const maxOff = Math.max(0, chartCycleList.length - limit);
+		const safeOff = Math.min(Math.max(0, chartPageOffset), maxOff);
+		const endIdx = chartCycleList.length - safeOff;
+		const startIdx = Math.max(0, endIdx - limit);
+		return chartCycleList.slice(startIdx, endIdx);
+	});
+
+	let canGoPrev = $derived(
+		selectedCycleFilterCount < chartCycleList.length &&
+		chartPageOffset < chartCycleList.length - selectedCycleFilterCount
+	);
+	let canGoNext = $derived(
+		selectedCycleFilterCount < chartCycleList.length &&
+		chartPageOffset > 0
+	);
+
+	function prevChartWindow() {
+		if (canGoPrev) {
+			chartPageOffset++;
+			activeChartIndex = null;
+		}
+	}
+
+	function nextChartWindow() {
+		if (canGoNext) {
+			chartPageOffset--;
+			activeChartIndex = null;
+		}
+	}
+
+	let chartRangeText = $derived.by(() => {
+		if (visibleChartCycleList.length === 0) return "Belum Ada Siklus";
+		if (visibleChartCycleList.length === 1) return visibleChartCycleList[0].month;
+		const first = visibleChartCycleList[0].month;
+		const last = visibleChartCycleList[visibleChartCycleList.length - 1].month;
+		return `${first} – ${last}`;
 	});
 
  // Period Status proxy for template compatibility with dial & cards
@@ -469,22 +554,73 @@
 	}
 
 
- function addWaterCup(amount = 1) {
- loggedWaterCups = Math.min(12, Math.max(0, loggedWaterCups + amount));
- saveTrackerData(true);
- }
-
- function setWaterCups(cups) {
- loggedWaterCups = Math.min(12, Math.max(0, cups));
- saveTrackerData(true);
- }
-
  function openDatePicker() {
-  modalStartDate = latestCycle ? latestCycle.start : todayISO();
-  isDatePickerOpen = true;
- }
+		returnToHistoryModalAfterDatePick = false;
+		editingCycleId = latestCycle ? latestCycle.id : null;
+		datePickerModalTitle = 'Atur Tanggal Menstruasi';
+		if (latestCycle) {
+			modalStartDate = latestCycle.start;
+			modalEndDate = latestCycle.end || '';
+			isPeriodOngoingCheckbox = !latestCycle.end;
+		} else {
+			modalStartDate = todayISO();
+			modalEndDate = '';
+			isPeriodOngoingCheckbox = true;
+		}
+		isDatePickerOpen = true;
+	}
 
- function startPeriodToday() {
+	function closeDatePicker() {
+		isDatePickerOpen = false;
+		if (returnToHistoryModalAfterDatePick) {
+			isHistoryModalOpen = true;
+			returnToHistoryModalAfterDatePick = false;
+		}
+	}
+
+	function openEditSpecificCycle(c) {
+		returnToHistoryModalAfterDatePick = true;
+		isHistoryModalOpen = false;
+		editingCycleId = c.id;
+		datePickerModalTitle = 'Edit Riwayat Siklus';
+		modalStartDate = c.start;
+		modalEndDate = c.end || '';
+		isPeriodOngoingCheckbox = !c.end;
+		isDatePickerOpen = true;
+	}
+
+	function openAddPastCycleModal() {
+		returnToHistoryModalAfterDatePick = true;
+		isHistoryModalOpen = false;
+		editingCycleId = null;
+		datePickerModalTitle = 'Catat Siklus Sebelumnya';
+		if (cycles.length > 0) {
+			const sorted = [...cycles].sort((a, b) => a.start.localeCompare(b.start));
+			const earliest = sorted[0];
+			const suggestedStart = addDays(earliest.start, -(settings.cycleLength || 28));
+			const suggestedEnd = addDays(suggestedStart, (settings.periodDuration || 5) - 1);
+			modalStartDate = suggestedStart;
+			modalEndDate = suggestedEnd;
+			isPeriodOngoingCheckbox = false;
+		} else {
+			modalStartDate = addDays(todayISO(), -28);
+			modalEndDate = addDays(modalStartDate, 4);
+			isPeriodOngoingCheckbox = false;
+		}
+		isDatePickerOpen = true;
+	}
+
+
+	function markPeriodEndedToday() {
+		if (!latestCycle) return;
+		const endIso = todayISO();
+		cycles = endCycle(cycles, endIso);
+		savePeriodStore({ version: 2, settings, cycles, logs });
+		syncAllCyclesToSupabase(cycles);
+		showToast(`Haid selesai dicatat (berakhir ${formatDateIndo(endIso, 'short')})!`);
+	}
+
+	function startPeriodToday() {
 		cycles = startCycle(cycles, todayISO());
 		selectedDateStr = todayISO();
 		loadLogForDate(todayISO());
@@ -493,20 +629,66 @@
 		showToast("Haid baru dimulai hari ini (Day 1)!");
 	}
 
+	function handleSaveDatePicker() {
+		if (!modalStartDate) return;
+		const endVal = isPeriodOngoingCheckbox ? null : (modalEndDate || modalStartDate);
+		const safeEnd = endVal && diffDays(modalStartDate, endVal) < 0 ? modalStartDate : endVal;
 
- function handleSaveDatePicker() {
-		if (modalStartDate) {
-			cycles = startCycle(cycles, modalStartDate);
-			selectedDateStr = modalStartDate;
-			loadLogForDate(modalStartDate);
-			syncAllCyclesToSupabase(cycles);
+		if (editingCycleId) {
+			// Updating a specific cycle directly by ID (from Edit button in History)
+			cycles = sanitizeCycles(cycles.map(c => {
+				if (c.id === editingCycleId) {
+					return { ...c, start: modalStartDate, end: safeEnd };
+				}
+				return c;
+			}));
+			showToast("Riwayat siklus berhasil diperbarui!");
+		} else {
+			// 1. Check if there's an existing cycle with the exact same start date
+			const sameStartIdx = cycles.findIndex(c => c.start === modalStartDate);
+
+			// 2. Check if there's an accidental today stub (e.g. created by Mulai/Selesai Haid button today)
+			const todayStubIdx = cycles.findIndex(c => c.start === todayISO() && (c.end === todayISO() || !c.end));
+
+			if (sameStartIdx !== -1) {
+				cycles = sanitizeCycles(cycles.map((c, i) => {
+					if (i === sameStartIdx) {
+						return { ...c, start: modalStartDate, end: safeEnd };
+					}
+					return c;
+				}));
+				showToast("Data siklus berhasil disimpan!");
+			} else if (todayStubIdx !== -1 && modalStartDate !== todayISO()) {
+				cycles = sanitizeCycles(cycles.map((c, i) => {
+					if (i === todayStubIdx) {
+						return { ...c, start: modalStartDate, end: safeEnd };
+					}
+					return c;
+				}));
+				showToast("Data siklus berhasil disimpan!");
+			} else {
+				// Brand new cycle (past cycle or new cycle)
+				cycles = sanitizeCycles([
+					...cycles,
+					{ id: generateCycleId(), start: modalStartDate, end: safeEnd }
+				]);
+				showToast("Siklus berhasil ditambahkan ke riwayat!");
+			}
 		}
-		isDatePickerOpen = false;
+
+		editingCycleId = null;
+		selectedDateStr = modalStartDate;
+		loadLogForDate(modalStartDate);
 		savePeriodStore({ version: 2, settings, cycles, logs });
-		showToast("Tanggal mulai haid berhasil dicatat!");
+		syncAllCyclesToSupabase(cycles);
+		isDatePickerOpen = false;
+		if (returnToHistoryModalAfterDatePick) {
+			isHistoryModalOpen = true;
+			returnToHistoryModalAfterDatePick = false;
+		}
 	}
 
- function selectDate(iso) {
+	function selectDate(iso) {
  selectedDateStr = iso;
  loadLogForDate(iso);
  }
@@ -662,10 +844,32 @@
 
  <!-- Edit Period Dates Button -->
  <div class="hero-actions-pill-row">
- <button type="button" class="btn-edit-period-dates" onclick={openDatePicker}>
- <span>Edit Date</span>
- </button>
- </div>
+					{#if latestCycle && !latestCycle.end}
+						<button type="button" class="btn-mark-done-hero" onclick={markPeriodEndedToday} title="Tandai darah haid sudah berhenti hari ini">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="20 6 9 17 4 12"></polyline>
+							</svg>
+							<span>Selesai Haid</span>
+						</button>
+					{:else}
+						<button type="button" class="btn-start-period-hero" onclick={startPeriodToday} title="Catat siklus haid baru mulai hari ini">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="12" y1="5" x2="12" y2="19"></line>
+								<line x1="5" y1="12" x2="19" y2="12"></line>
+							</svg>
+							<span>Mulai Haid</span>
+						</button>
+					{/if}
+					<button type="button" class="btn-edit-period-dates" onclick={openDatePicker} title="Atur tanggal mulai dan selesai haid">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+							<line x1="16" y1="2" x2="16" y2="6"></line>
+							<line x1="8" y1="2" x2="8" y2="6"></line>
+							<line x1="3" y1="10" x2="21" y2="10"></line>
+						</svg>
+						<span>Edit Date</span>
+					</button>
+				</div>
  </div>
 
  <!-- Soft Organic Wave Curves in Background -->
@@ -677,58 +881,31 @@
  <!-- Greeting & Action Cards (Matches Right Screen in Reference) -->
  <div class="greeting-banner-card">
  <div class="greet-titles">
- <span class="greet-sub">Hey Winda, How's your feeling today? </span>
+ <span class="greet-sub">Hii An.. How's your feeling today? </span>
  <!-- <h3 class="greet-main">How are you feeling today?</h3> -->
  </div>
  <div class="greet-square-grid">
- <!-- Box Square Kiri: Hydration Tracker (Water & Self-Care Counter, 1 layer) -->
- <button
- type="button"
- class="simple-feature-box box-water"
- onclick={() => isWaterModalOpen = true}
- title="Klik untuk lihat detail hidrasi harian"
- >
- <div class="water-dial-wrap">
- <svg class="water-dial-svg" viewBox="0 0 110 110" width="124" height="124">
- <!-- Background Ring -->
- <circle
- cx="55"
- cy="55"
- r="43"
- fill="none"
- stroke="#E0F2FE"
- stroke-width="5.5"
- />
- <!-- Dynamic Water Progress Arc (Cyan / Sky Blue) -->
- <circle
- cx="55"
- cy="55"
- r="43"
- fill="none"
- stroke="#38BDF8"
- stroke-width="5.5"
- stroke-linecap="round"
- stroke-dasharray="270"
- stroke-dashoffset={270 - (270 * Math.min(loggedWaterCups / 8, 1))}
- transform="rotate(-90 55 55)"
- class="water-progress-ring"
- />
- <!-- Water Droplet Emoji in Center -->
-      <text x="55" y="47" text-anchor="middle" dominant-baseline="central" font-size="28" class="water-emoji-icon">💧</text>
+ <!-- Box Square Kiri: Cycle History (With Superman Mascot Lottie Animation Full) -->
+					<button
+						type="button"
+						class="simple-feature-box box-history"
+						onclick={() => isHistoryModalOpen = true}
+						title="Klik untuk lihat riwayat siklus haid"
+					>
+						<div class="history-dial-wrap">
+							<div class="superman-lottie-wrapper">
+								<iframe
+									src="https://lottie.host/embed/998700b9-dfb1-4162-9ff6-6c15abd529f1/5v2R0Pwh8g.lottie"
+									title="Superman Mascot - Arsyad Superhero Winda"
+									class="superman-card-lottie-frame"
+									loading="lazy"
+								></iframe>
+							</div>
+						</div>
+						<span class="simple-box-label">Cycle History</span>
+					</button>
 
-<!-- Counter Display Under Droplet -->
- <text x="55" y="76" text-anchor="middle" class="water-card-count">
- {loggedWaterCups}/8 Gelas
- </text>
- <text x="55" y="87" text-anchor="middle" class="water-card-pct">
- {Math.round((loggedWaterCups / 8) * 100)}%
- </text>
- </svg>
- </div>
- <span class="simple-box-label">Hydration Tracker</span>
- </button>
-
- <!-- Box Square Kanan: Tracker Hari Siklus / Daily Health Journal -->
+					<!-- Box Square Kanan: Tracker Hari Siklus / Daily Health Journal -->
  <button
  type="button"
  class="simple-feature-box box-tracker"
@@ -834,7 +1011,7 @@
  </div>
  </div>
 
- <!-- ── A. MENSTRUAL FLOW (MATCHES REFERENCE SQUIRCLE ROW) ── -->
+<!-- ── A. MENSTRUAL FLOW (MATCHES REFERENCE SQUIRCLE ROW) ── -->
  <section class="log-feature-block">
  <div class="block-head-wrap">
  <h3 class="block-main-title">Menstrual Flow</h3>
@@ -887,7 +1064,7 @@
  <h3 class="block-main-title">Mood</h3>
  </div>
 
- <div class="squircle-scroll-row">
+ <div class="squircle-grid-row mood-5col">
  {#each MOODS as m}
  <div class="squircle-item-col">
  <button
@@ -1130,7 +1307,7 @@
  <h3 class="late-alert-title">Telat Haid {periodStatus.lateDays} Hari</h3>
  </div>
  <p class="late-alert-message">
- Jangan cemas ya Winda. Siklus alami tubuh wajar bergeser beberapa hari karena stres, kelelahan, fluktuasi hormon, atau perubahan pola tidur. Tetap jaga istirahat, penuhi cairan tubuh, dan pantau kondisi secara berkala.
+ Jangan cemas An. Siklus alami tubuh wajar bergeser beberapa hari karena stres, kelelahan, fluktuasi hormon, atau perubahan pola tidur. Tetap jaga istirahat, penuhi cairan tubuh, dan pantau kondisi secara berkala.
  </p>
  <div class="late-alert-actions">
  <button type="button" class="btn-late-start-today" onclick={startPeriodToday}>
@@ -1140,76 +1317,89 @@
  </section>
  {/if}
 
-		<!-- ── CYCLE HISTORY SECTION (EXACT REPLICA OF REFERENCE DESIGN) ── -->
-		<section class="cycle-history-section">
-			<div class="cycle-history-header">
-				<div class="ch-header-left">
-					<h3 class="ch-section-title">Cycle History</h3>
-				</div>
-				<div class="ch-header-right">
-					<span class="ch-status-pill">
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="20 6 9 17 4 12"></polyline>
+				<!-- ── CYCLE LENGTH TREND CHART (GRAFIK PANJANG SIKLUS SOFT PINK) ── -->
+		{#if chartCycleList.length > 0}
+			<section class="cycle-chart-card">
+				<div class="chart-header-row">
+					<h3 class="chart-title">Cycle Length</h3>
+					<div class="chart-range-pill" title="Pilih jumlah bar siklus">
+						<select
+							bind:value={selectedCycleFilterCount}
+							class="chart-filter-select"
+							aria-label="Pilih jumlah siklus ditampilkan"
+							onchange={() => { chartPageOffset = 0; activeChartIndex = null; }}
+						>
+							<option value={5}>5 Siklus</option>
+							<option value={7}>7 Siklus</option>
+							<option value={10}>10 Siklus</option>
+							<option value={999}>Semua</option>
+						</select>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="dropdown-arrow-icon">
+							<polyline points="6 9 12 15 18 9"></polyline>
 						</svg>
-						<span>{stats.isIrregular ? "Bervariasi" : "Normal"}</span>
-					</span>
-					<button type="button" class="btn-ch-see-all" onclick={() => isHistoryModalOpen = true}>
-						See All
-					</button>
-				</div>
-			</div>
-
-			<div class="cycle-history-list">
-				{#if displayCycleHistory.length === 0}
-					<div class="ch-empty-card">
-						<p class="ch-empty-text">Belum ada riwayat siklus yang dicatat.<br/>Klik <strong>Edit Date</strong> untuk mulai mencatat siklus pertamamu.</p>
 					</div>
-				{:else}
-					{#each displayCycleHistory as item}
+				</div>
+
+				<div class="chart-bars-container">
+					{#each visibleChartCycleList as item, idx}
+						{@const isActive = activeChartIndex === idx || (activeChartIndex === null && idx === visibleChartCycleList.length - 1)}
+						{@const fillPercent = Math.min(100, Math.max(35, Math.round(((item.days - 18) / (38 - 18)) * 100)))}
+						<div
+							class="chart-col"
+							class:is-active={isActive}
+							onclick={() => activeChartIndex = idx}
+							onmouseenter={() => activeChartIndex = idx}
+							role="button"
+							tabindex="0"
+							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') activeChartIndex = idx; }}
+							aria-label={`Siklus ${item.days} hari, periode ${item.rangeLabel}`}
+						>
+							{#if isActive}
+								<div class="chart-tooltip-bubble">
+									<span>{item.rangeLabel}</span>
+								</div>
+							{/if}
+							<div class="capsule-track">
+								<div class="capsule-fill" style="height: {fillPercent}%;"></div>
+							</div>
+							<span class="col-days-label">{item.days}</span>
+						</div>
+					{/each}
+				</div>
+
+				<div class="chart-bottom-nav">
 					<button
 						type="button"
-						class="cycle-history-card"
-						onclick={() => isHistoryModalOpen = true}
+						class="chart-nav-btn"
+						onclick={prevChartWindow}
+						disabled={!canGoPrev}
+						class:is-disabled={!canGoPrev}
+						aria-label="Siklus Sebelumnya"
+						title="Lihat siklus sebelumnya"
 					>
-						<!-- Left: Stylized Hot-Pink Uterus Icon & Info -->
-						<div class="ch-card-left">
-							<div class="ch-icon-bubble">
-								<svg viewBox="0 0 32 32" width="24" height="24" fill="none" stroke="#F43F5E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M16 26 C12.5 22.5 11 18 11 14.5 C11 11.5 13 9.5 16 9.5 C19 9.5 21 11.5 21 14.5 C21 18 19.5 22.5 16 26 Z" />
-									<path d="M12 12.5 C9 12.5 6 10.5 6 7.5 C6 5.5 8 5.5 9.5 7 C10.5 8 11.5 10 12.5 11" />
-									<path d="M20 12.5 C23 12.5 26 10.5 26 7.5 C26 5.5 24 5.5 22.5 7 C21.5 8 20.5 10 19.5 11" />
-								</svg>
-							</div>
-							<div class="ch-info">
-								<h4 class="ch-day-title">Day {item.dayNum}</h4>
-								<span class="ch-phase-subtitle">{item.phaseName}</span>
-								{#if item.isCurrent && item.nextPeriodDays > 0}
-									<div class="ch-next-badge">
-										<span class="ch-check-dot">
-											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-												<polyline points="20 6 9 17 4 12"></polyline>
-											</svg>
-										</span>
-										<span>Next period in {item.nextPeriodDays}d</span>
-									</div>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Right: Date & Chevron -->
-						<div class="ch-card-right">
-							<span class="ch-date-text">{item.dateFormatted}</span>
-							<svg class="ch-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-								<polyline points="9 18 15 12 9 6"></polyline>
-							</svg>
-						</div>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="15 18 9 12 15 6"></polyline>
+						</svg>
 					</button>
-				{/each}
-				{/if}
-			</div>
-		</section>
+					<span class="chart-month-range-text">{chartRangeText}</span>
+					<button
+						type="button"
+						class="chart-nav-btn"
+						onclick={nextChartWindow}
+						disabled={!canGoNext}
+						class:is-disabled={!canGoNext}
+						aria-label="Siklus Selanjutnya"
+						title="Lihat siklus berikutnya"
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="9 18 15 12 9 6"></polyline>
+						</svg>
+					</button>
+				</div>
+			</section>
+		{/if}
 
- <!-- ── F. DAILY INSIGHTS ANCHOR & 4 PHASES ── -->
+<!-- ── F. DAILY INSIGHTS ANCHOR & 4 PHASES ── -->
  <div id="daily-insights-section"></div>
  <section class="phases-overview-section">
 			<div class="phases-header-row">
@@ -1305,194 +1495,108 @@
  <!-- ── 5. DATE PICKER POP-UP MODAL (FITUR TAMBAH/EDIT DATA HAID) ── -->
  {#if isDatePickerOpen}
  <div
- class="picker-modal-backdrop"
- role="dialog"
- aria-modal="true"
- tabindex="-1"
- onclick={(e) => { if (e.target === e.currentTarget) isDatePickerOpen = false; }}
- onkeydown={(e) => { if (e.key === 'Escape') isDatePickerOpen = false; }}
+ class="picker-modal-backdrop datepicker-backdrop"
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		onclick={(e) => { if (e.target === e.currentTarget) closeDatePicker(); }}
+		onkeydown={(e) => { if (e.key === 'Escape') closeDatePicker(); }}
  >
  <div class="picker-modal-card">
  <div class="picker-card-head">
  <div class="picker-head-left">
  <span class="picker-head-badge"> SET DATA HAID</span>
- <h3 class="picker-card-title">Atur Tanggal Menstruasi</h3>
+ <h3 class="picker-card-title">{datePickerModalTitle}</h3>
  </div>
  <button
  type="button"
  class="picker-close-btn"
- onclick={() => isDatePickerOpen = false}
- aria-label="Tutup modal"
+ onclick={closeDatePicker}
+				aria-label="Tutup modal"
  >
  ✕
  </button>
  </div>
 
  <form class="picker-form" onsubmit={(e) => { e.preventDefault(); handleSaveDatePicker(); }}>
- <!-- Tanggal Mulai Haid Picker -->
- <div class="picker-field">
- <label for="picker-start-date" class="field-label">
- Hari Pertama Haid (Start Date) 
- </label>
- <input
- id="picker-start-date"
- type="date"
- class="date-input-box"
- bind:value={modalStartDate}
- required
- />
- <!-- Quick Date Shortcut Chips -->
- <div class="quick-date-chips">
- <button
- type="button"
- class="q-chip"
- onclick={() => modalStartDate = todayISO()}
- >
- Hari Ini
- </button>
- <button
- type="button"
- class="q-chip"
- onclick={() => modalStartDate = addDays(todayISO(), -1)}
- >
- Kemarin
- </button>
- <button
- type="button"
- class="q-chip"
- onclick={() => modalStartDate = addDays(todayISO(), -2)}
- >
- 2 Hari Lalu
- </button>
- </div>
- </div>
+					<!-- Tanggal Mulai Haid Picker -->
+					<div class="picker-field">
+						<label for="picker-start-date" class="field-label">
+							Hari Pertama Haid (Start Date)
+						</label>
+						<input
+							id="picker-start-date"
+							type="date"
+							class="date-input-box"
+							bind:value={modalStartDate}
+							required
+						/>
+						<!-- Quick Date Shortcut Chips -->
+						<div class="quick-date-chips">
+							<button type="button" class="q-chip" onclick={() => modalStartDate = todayISO()}>
+								Hari Ini
+							</button>
+							<button type="button" class="q-chip" onclick={() => modalStartDate = addDays(todayISO(), -1)}>
+								Kemarin
+							</button>
+							<button type="button" class="q-chip" onclick={() => modalStartDate = addDays(todayISO(), -2)}>
+								2 Hari Lalu
+							</button>
+						</div>
+					</div>
 
- <!-- Submit Button -->
- <div class="picker-actions">
- <button
- type="button"
- class="btn-cancel-picker"
- onclick={() => isDatePickerOpen = false}
- >
- Batal
- </button>
- <button type="submit" class="btn-submit-picker">
- Simpan Tanggal 
- </button>
- </div>
- </form>
- </div>
- </div>
- {/if}
+					<!-- Status Haid Masih Berlangsung Checkbox -->
+					<div class="picker-ongoing-toggle-row">
+						<label class="ongoing-checkbox-label">
+							<input
+								type="checkbox"
+								class="ongoing-checkbox"
+								bind:checked={isPeriodOngoingCheckbox}
+							/>
+							<span class="ongoing-toggle-text">Haid masih berlangsung (belum selesai)</span>
+						</label>
+					</div>
 
- <!-- ── WATER INTAKE & HYDRATION DETAIL MODAL ── -->
- {#if isWaterModalOpen}
- <div class="picker-modal-backdrop" onclick={() => isWaterModalOpen = false} role="presentation">
- <div
- class="modal-card water-modal-card"
- onclick={(e) => e.stopPropagation()}
- onkeydown={(e) => e.stopPropagation()}
- role="dialog"
- tabindex="-1"
- aria-modal="true"
- >
- <!-- Top Mascot with Superman Lottie animation (as specifically requested in detail!) -->
- <div class="water-modal-mascot-wrap">
- <div class="water-mascot-bubble">
- <iframe
- src="https://lottie.host/embed/998700b9-dfb1-4162-9ff6-6c15abd529f1/5v2R0Pwh8g.lottie"
- title="Superman Mascot"
- class="water-modal-lottie-frame"
- loading="lazy"
- ></iframe>
- </div>
- <button
- type="button"
- class="picker-close-btn"
- onclick={() => isWaterModalOpen = false}
- aria-label="Tutup Modal"
- >✕</button>
- </div>
+					<!-- Tanggal Selesai Haid Picker (Tampil jika sudah selesai) -->
+					{#if !isPeriodOngoingCheckbox}
+						<div class="picker-field animated-fade-in">
+							<label for="picker-end-date" class="field-label">
+								Hari Terakhir Haid (End Date)
+							</label>
+							<input
+								id="picker-end-date"
+								type="date"
+								class="date-input-box"
+								bind:value={modalEndDate}
+								min={modalStartDate}
+								required
+							/>
+							<!-- Quick Date Shortcut Chips for End Date -->
+							<div class="quick-date-chips">
+								<button type="button" class="q-chip" onclick={() => modalEndDate = todayISO()}>
+									Hari Ini
+								</button>
+								<button type="button" class="q-chip" onclick={() => modalEndDate = addDays(todayISO(), -1)}>
+									Kemarin
+								</button>
+							</div>
+						</div>
+					{/if}
 
- <div class="water-head-texts">
- <h2 class="water-modal-title">Daily Hydration Tracker</h2>
- <p class="water-modal-subtitle">
- Cukupi cairan tubuh setiap hari untuk memulihkan stamina coy
- </p>
- </div>
-
- <!-- Big Metric Banner -->
- <div class="water-stat-banner">
- <div class="water-stat-big">
- <span class="water-stat-num">{loggedWaterCups}</span>
- <span class="water-stat-denom">/ 8 Gelas</span>
- </div>
- <div class="water-stat-vol">
- <strong>{loggedWaterCups * 250} ml</strong> dari target 2.000 ml
- </div>
- <!-- Progress Bar -->
- <div class="water-prog-bar-track">
- <div
- class="water-prog-bar-fill"
- style="width: {Math.min(100, Math.round((loggedWaterCups / 8) * 100))}%"
- ></div>
- </div>
- </div>
-
- <!-- Interactive 8 Glasses Row -->
- <div class="water-glasses-row">
- {#each Array(8) as _, i}
- <button
- type="button"
- class="water-cup-btn"
- class:is-filled={i < loggedWaterCups}
- onclick={() => setWaterCups(i + 1)}
- title={`Gelas ke-${i + 1}`}
- >
- <span class="cup-emoji">🥛</span>
- <span class="cup-label">{i + 1}</span>
- </button>
- {/each}
- </div>
-
- <!-- Stepper Buttons (+1, -1) -->
- <div class="water-stepper-actions">
- <button
- type="button"
- class="btn-water-minus"
- onclick={() => addWaterCup(-1)}
- disabled={loggedWaterCups <= 0}
- >
- - 1 Gelas
- </button>
- <button
- type="button"
- class="btn-water-plus"
- onclick={() => addWaterCup(1)}
- >
- + 1 Gelas (250 ml)
- </button>
- </div>
-
- <!-- Health Note / Tip -->
- <!-- <div class="water-tip-box">
- <h4 class="water-tip-head">Tips Kesehatan & Siklus:</h4>
- <p class="water-tip-text">
- Minum air putih hangat membantu merelaksasi otot rahim yang tegang dan memperlancar aliran sirkulasi darah saat fase menstruasi.
- </p>
- </div> -->
-
- <!-- Close / Save Action -->
- <button
- type="button"
- class="btn-save-water"
- onclick={() => {
- saveTrackerData();
- isWaterModalOpen = false;
- }}
- >
- Simpan Catatan Hidrasi
- </button>
+					<!-- Submit Button -->
+					<div class="picker-actions">
+						<button
+							type="button"
+							class="btn-cancel-picker"
+							onclick={closeDatePicker}
+						>
+							Batal
+						</button>
+						<button type="submit" class="btn-submit-picker">
+							Simpan Tanggal
+						</button>
+					</div>
+				</form>
  </div>
  </div>
  {/if}
@@ -1711,15 +1815,22 @@
  {#if isHistoryModalOpen}
  <div class="picker-modal-backdrop" onclick={() => isHistoryModalOpen = false} role="presentation">
  <div class="history-modal-card" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" tabindex="-1" aria-modal="true">
- <div class="history-modal-header">
- <div>
-
- <h3 class="picker-card-title">Riwayat Siklus Haid</h3>
- </div>
- <button type="button" class="picker-close-btn" onclick={() => isHistoryModalOpen = false} aria-label="Tutup modal">✕</button>
- </div>
-
- <div class="history-modal-body">
+ <div class="history-modal-mascot-wrap">
+					<!-- <div class="history-mascot-bubble">
+						<iframe
+							src="https://lottie.host/embed/998700b9-dfb1-4162-9ff6-6c15abd529f1/5v2R0Pwh8g.lottie"
+							title="Superman Mascot - Arsyad Superhero Winda"
+							class="history-modal-lottie-frame"
+							loading="lazy"
+						></iframe>
+					</div> -->
+					<button type="button" class="picker-close-btn" onclick={() => isHistoryModalOpen = false} aria-label="Tutup modal">✕</button>
+				</div>
+				<div class="history-head-texts">
+					<h3 class="history-modal-title">Riwayat Siklus Haid</h3>
+					<p class="history-modal-subtitle">Catatan tren siklus dan Superhero Siaga untuk Winda</p>
+				</div>
+				<div class="history-modal-body">
  <div class="history-stats-banner">
  <div>
  <span class="h-stat-lbl">Rata-rata Siklus</span>
@@ -1741,36 +1852,60 @@
 						{:else}
 							{#each [...cycles].reverse() as c, idx}
 								{@const isLatest = idx === 0}
-								{@const dur = c.end ? diffDays(c.start, c.end) + 1 : "Sedang Berlangsung"}
-								{@const cDay = isLatest ? Math.max(1, diffDays(c.start, todayISO()) + 1) : (c.end ? diffDays(c.start, c.end) + 1 : 28)}
+								{@const isOngoing = !c.end}
+								{@const durDays = c.end ? Math.max(1, diffDays(c.start, c.end) + 1) : Math.max(1, diffDays(c.start, todayISO()) + 1)}
 								<div class="history-item-row-card">
-									<div class="ch-card-left">
+									<div class="ch-card-main">
 										<div class="ch-icon-bubble">
-											<svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="#F43F5E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+											<svg viewBox="0 0 32 32" width="20" height="20" fill="none" stroke="#F43F5E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
 												<path d="M16 26 C12.5 22.5 11 18 11 14.5 C11 11.5 13 9.5 16 9.5 C19 9.5 21 11.5 21 14.5 C21 18 19.5 22.5 16 26 Z" />
 												<path d="M12 12.5 C9 12.5 6 10.5 6 7.5 C6 5.5 8 5.5 9.5 7 C10.5 8 11.5 10 12.5 11" />
 												<path d="M20 12.5 C23 12.5 26 10.5 26 7.5 C26 5.5 24 5.5 22.5 7 C21.5 8 20.5 10 19.5 11" />
 											</svg>
 										</div>
 										<div class="ch-info">
-											<div class="m-cycle-title-row">
-												<h4 class="ch-day-title">Day {cDay}</h4>
-												{#if !c.end}
+											<!-- <div class="m-cycle-title-row">
+												<h4 class="ch-day-title">{isOngoing ? `Day ${durDays}` : `${durDays} Hari Haid`}</h4>
+												{#if isOngoing}
 													<span class="h-ongoing-pill">Aktif</span>
+												{:else}
+													<span class="h-completed-pill">Selesai</span>
 												{/if}
+											</div> -->
+											<div class="m-cycle-meta-row">
+												<span class="m-dates-sub">{formatDateIndo(c.start, "short")} - {c.end ? formatDateIndo(c.end, "short") : "Sekarang"}</span>
+												<span class="m-dot-sep">•</span>
+												<span class="ch-phase-subtitle">{isOngoing ? (currentDayStatus.phaseName || "Fase Menstruasi") : "Selesai"}</span>
 											</div>
-											<span class="ch-phase-subtitle">{isLatest ? (currentDayStatus.phaseName || "Fase Ovulasi") : "Siklus Selesai"}</span>
-											<span class="m-dates-sub">{formatDateIndo(c.start, "short")} - {c.end ? formatDateIndo(c.end, "short") : "Sekarang"}</span>
 										</div>
 									</div>
 									<div class="m-actions-right">
-										<span class="ch-date-text">{formatCycleDate(c.start)}</span>
-										<button type="button" class="btn-delete-cycle" onclick={() => deleteCycleEntry(c.id)} title="Hapus catatan ini">✕</button>
+										<button type="button" class="btn-edit-cycle" onclick={() => openEditSpecificCycle(c)} title="Edit riwayat siklus ini" aria-label="Edit catatan">
+											<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M12 20h9"></path>
+												<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+											</svg>
+										</button>
+										<button type="button" class="btn-delete-cycle" onclick={() => deleteCycleEntry(c.id)} title="Hapus catatan ini" aria-label="Hapus catatan">
+											<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+												<line x1="18" y1="6" x2="6" y2="18"></line>
+												<line x1="6" y1="6" x2="18" y2="18"></line>
+											</svg>
+										</button>
 									</div>
 								</div>
 							{/each}
 						{/if}
 					</div>
+
+					<!-- Tombol Tambah Siklus / Catat Siklus Sebelumnya -->
+					<button type="button" class="btn-add-past-cycle" onclick={openAddPastCycleModal}>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="12" y1="5" x2="12" y2="19"></line>
+							<line x1="5" y1="12" x2="19" y2="12"></line>
+						</svg>
+						<span>Catat Siklus Sebelumnya</span>
+					</button>
 				</div>
  <div class="history-modal-footer">
  <button type="button" class="btn-close-history-full" onclick={() => isHistoryModalOpen = false}>
@@ -2069,7 +2204,99 @@
  line-height: 1;
  }
 
- .hero-actions-pill-row {
+ 
+	.btn-mark-done-hero {
+		background: #10B981;
+		color: #FFFFFF;
+		border: none;
+		border-radius: 999px;
+		padding: 10px 18px;
+		font-size: 0.84rem;
+		font-weight: 800;
+		cursor: pointer;
+		box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.btn-mark-done-hero:hover {
+		background: #059669;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+	}
+
+	.btn-mark-done-hero:active {
+		transform: scale(0.96);
+	}
+
+	.btn-start-period-hero {
+		background: #E11D48;
+		color: #FFFFFF;
+		border: none;
+		border-radius: 999px;
+		padding: 10px 18px;
+		font-size: 0.84rem;
+		font-weight: 800;
+		cursor: pointer;
+		box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35);
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.btn-start-period-hero:hover {
+		background: #BE123C;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45);
+	}
+
+	.btn-start-period-hero:active {
+		transform: scale(0.96);
+	}
+
+	.picker-ongoing-toggle-row {
+		background: #FFF1F2;
+		border: 1px solid #FFE4E6;
+		border-radius: 14px;
+		padding: 10px 14px;
+		margin-top: 4px;
+		box-sizing: border-box;
+	}
+
+	.ongoing-checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		cursor: pointer;
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: #BE123C;
+		user-select: none;
+	}
+
+	.ongoing-checkbox {
+		width: 18px;
+		height: 18px;
+		accent-color: #E11D48;
+		cursor: pointer;
+	}
+
+	.ongoing-toggle-text {
+		line-height: 1.3;
+	}
+
+	.btn-edit-period-dates {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.hero-actions-pill-row {
  display: flex;
  align-items: center;
  gap: 8px;
@@ -2135,7 +2362,7 @@
  .greet-sub {
  font-size: 0.8rem;
  font-weight: 800;
- color: #E11D48;
+ color: #000000;
  }
 
  /* ── GREETING SQUARE GRID (KANAN KIRI) ── */
@@ -2165,23 +2392,106 @@
  border: 1.5px solid #F3F4F6;
  }
 
- .simple-feature-box:hover {
- transform: translateY(-3px);
- }
+ 
 
  .simple-feature-box:active {
  transform: scale(0.97);
  }
 
+	/* ── Box History (Superman Lottie Mascot) ── */
+	.simple-feature-box.box-history {
+		background: linear-gradient(180deg, #FFFFFF 0%, #ffffff 100%);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+		border-color: #F3F4F6;
+	}
+
+	
+
+	.history-dial-wrap {
+		width: 100%;
+		height: 122px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.superman-lottie-wrapper {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: none;
+	}
+
+	.superman-card-lottie-frame {
+		width: 110px;
+		height: 120px;
+		border: none;
+		pointer-events: none;
+		background: transparent;
+		transform: scale(1.15) translateY(-2px);
+	}
+
+	/* ── History Modal Mascot Header ── */
+	.history-modal-mascot-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		margin-bottom: 8px;
+	}
+
+	.history-mascot-bubble {
+		width: 76px;
+		height: 76px;
+		border-radius: 50%;
+		background: #ffffff;
+		border: 2px solid #ffffff;
+		box-shadow: 0 4px 14px rgba(225, 29, 72, 0.1);
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.history-modal-lottie-frame {
+		width: 100px;
+		height: 100px;
+		border: none;
+		pointer-events: none;
+		transform: scale(1.15) translateY(-2px);
+	}
+
+	.history-head-texts {
+		text-align: left;
+		margin-bottom: 14px;
+		width: 100%;
+	}
+
+	.history-modal-title {
+		font-size: 1.22rem;
+		font-weight: 800;
+		color: #0F172A;
+		margin: 0 0 3px;
+		letter-spacing: -0.015em;
+	}
+
+	.history-modal-subtitle {
+		font-size: 0.78rem;
+		color: #64748B;
+		margin: 0;
+	}
+
+
  .simple-feature-box.box-tracker {
- background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF5 100%);
+ background: linear-gradient(180deg, #FFFFFF 0%, #ffffff 100%);
  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.06);
  }
 
- .simple-feature-box.box-tracker:hover {
- border-color: #FDE047;
- box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
- }
+ 
 
  /* Cycle Dial Tracker (Matches Reference Image) */
  .cycle-dial-wrap {
@@ -2199,9 +2509,7 @@
  transition: transform 0.2s ease;
  }
 
- .simple-feature-box:hover .cycle-dial-svg {
- transform: scale(1.04);
- }
+ 
 
  .dial-day-text {
  font-size: 13.5px;
@@ -2266,6 +2574,24 @@
  .flow-3col {
  grid-template-columns: repeat(3, 1fr);
  }
+
+	.mood-5col {
+		grid-template-columns: repeat(5, 1fr);
+		gap: clamp(4px, 1.5vw, 10px);
+		justify-items: center;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.mood-5col .squircle-card-btn {
+		width: clamp(52px, 13vw, 60px);
+		height: clamp(52px, 13vw, 60px);
+	}
+
+	.mood-5col .squircle-label {
+		font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+		white-space: nowrap;
+	}
 
  .squircle-scroll-row {
  display: flex;
@@ -2938,22 +3264,17 @@
 
  /* ── History Modal ── */
  .history-modal-card {
- max-width: 480px;
- width: 92%;
+ max-width: 460px;
+ width: 94%;
  max-height: 85vh;
  display: flex;
  flex-direction: column;
- padding: 24px;
+ padding: 20px 18px;
  background: #FFFFFF;
  border-radius: 24px;
  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
  }
- .history-modal-header {
- display: flex;
- justify-content: space-between;
- align-items: flex-start;
- margin-bottom: 16px;
- }
+ 
  .history-modal-body {
  overflow-y: auto;
  flex: 1;
@@ -2962,22 +3283,22 @@
  .history-stats-banner {
  display: grid;
  grid-template-columns: repeat(3, 1fr);
- gap: 8px;
+ gap: 6px;
  background: #FFF1F2;
- border-radius: 16px;
- padding: 12px;
- margin-bottom: 16px;
+ border-radius: 14px;
+ padding: 10px 8px;
+ margin-bottom: 14px;
  text-align: center;
  }
  .h-stat-lbl {
- font-size: 0.65rem;
+ font-size: 0.62rem;
  font-weight: 700;
  color: #BE123C;
  display: block;
  margin-bottom: 2px;
  }
  .h-stat-val {
- font-size: 0.95rem;
+ font-size: 0.92rem;
  font-weight: 800;
  color: #881337;
  }
@@ -2995,25 +3316,45 @@
  .h-ongoing-pill {
  background: #10B981;
  color: #FFFFFF;
- font-size: 0.62rem;
+ font-size: 0.6rem;
  font-weight: 800;
  border-radius: 999px;
- padding: 2px 7px;
+ padding: 1.5px 6.5px;
  text-transform: uppercase;
+ white-space: nowrap;
+ letter-spacing: 0.03em;
+ }
+ .h-completed-pill {
+ background: #F1F5F9;
+ color: #475569;
+ font-size: 0.6rem;
+ font-weight: 700;
+ border-radius: 999px;
+ padding: 1.5px 6.5px;
+ text-transform: uppercase;
+ border: 1px solid #E2E8F0;
+ white-space: nowrap;
+ letter-spacing: 0.03em;
  }
  .btn-delete-cycle {
- background: transparent;
+ width: 32px;
+ height: 32px;
+ border-radius: 10px;
+ background: #FFF1F2;
  border: 1px solid #FECDD3;
  color: #E11D48;
- font-size: 0.74rem;
- font-weight: 700;
- padding: 5px 10px;
- border-radius: 8px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
  cursor: pointer;
- transition: background 0.15s ease;
+ flex-shrink: 0;
+ transition: all 0.15s ease;
+ padding: 0;
  }
  .btn-delete-cycle:hover {
- background: #FFF1F2;
+ background: #FFE4E6;
+ border-color: #FDA4AF;
+ transform: scale(1.08);
  }
  .history-modal-footer {
  margin-top: 16px;
@@ -3034,254 +3375,7 @@
  background: #E2E8F0;
  }
 
- /* ── Hydration Box & Water Dial ── */
- .simple-feature-box.box-water {
- background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
- box-shadow: 0 4px 14px rgba(14, 165, 233, 0.08);
- }
- .simple-feature-box.box-water:hover {
- border-color: #7DD3FC;
- box-shadow: 0 8px 24px rgba(14, 165, 233, 0.16);
- }
- .water-dial-wrap {
- width: 100%;
- height: 124px;
- display: flex;
- align-items: center;
- justify-content: center;
- position: relative;
- }
- .water-dial-svg {
- display: block;
- max-width: 124px;
- height: auto;
- }
- .water-progress-ring {
- transition: stroke-dashoffset 0.4s ease;
- }
- .water-card-count {
- font-size: 0.74rem;
- font-weight: 800;
- fill: #0369A1;
- font-family: inherit;
- }
- .water-card-pct {
- font-size: 0.65rem;
- font-weight: 700;
- fill: #0284C7;
- font-family: inherit;
- }
-
- /* ── Water Modal Card & Mascot ── */
- .water-modal-card {
- max-width: 440px;
- width: 92%;
- padding: 24px 20px;
- background: #FFFFFF;
- border-radius: 28px;
- box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
- display: flex;
- flex-direction: column;
- box-sizing: border-box;
- animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
- position: relative;
- max-height: 90vh;
- overflow-y: auto;
- }
- .water-modal-mascot-wrap {
- display: flex;
- justify-content: space-between;
- align-items: flex-start;
- margin-bottom: 8px;
- }
- .water-mascot-bubble {
- width: 84px;
- height: 84px;
- background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
- border-radius: 22px;
- display: flex;
- align-items: center;
- justify-content: center;
- overflow: hidden;
- box-shadow: 0 4px 16px rgba(14, 165, 233, 0.18);
- }
- .water-modal-lottie-frame {
- width: 110px;
- height: 110px;
- border: none;
- pointer-events: none;
- transform: scale(1.15);
- background: transparent;
- }
- .water-head-texts {
- display: flex;
- flex-direction: column;
- gap: 4px;
- margin-bottom: 16px;
- }
- .water-modal-title {
- font-size: 1.25rem;
- font-weight: 800;
- color: #0F172A;
- margin: 2px 0 0 0;
- }
- .water-modal-subtitle {
- font-size: 0.8rem;
- color: #64748B;
- line-height: 1.45;
- margin: 0;
- }
- .water-stat-banner {
- background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
- border: 1px solid #BAE6FD;
- border-radius: 20px;
- padding: 16px;
- margin-bottom: 16px;
- display: flex;
- flex-direction: column;
- align-items: center;
- text-align: center;
- gap: 6px;
- }
- .water-stat-big {
- display: flex;
- align-items: baseline;
- gap: 4px;
- }
- .water-stat-num {
- font-size: 2.2rem;
- font-weight: 800;
- color: #0284C7;
- line-height: 1;
- }
- .water-stat-denom {
- font-size: 1rem;
- font-weight: 700;
- color: #0369A1;
- }
- .water-stat-vol {
- font-size: 0.82rem;
- color: #0369A1;
- }
- .water-prog-bar-track {
- width: 100%;
- height: 8px;
- background: #BAE6FD;
- border-radius: 999px;
- overflow: hidden;
- margin-top: 4px;
- }
- .water-prog-bar-fill {
- height: 100%;
- background: #0284C7;
- border-radius: 999px;
- transition: width 0.3s ease;
- }
- .water-glasses-row {
- display: grid;
- grid-template-columns: repeat(4, 1fr);
- gap: 8px;
- margin-bottom: 16px;
- }
- .water-emoji-icon {
-    user-select: none;
-    pointer-events: none;
-  }
-  .water-cup-btn .cup-emoji {
-    font-size: 1.55rem;
-    line-height: 1;
-    filter: grayscale(100%);
-    opacity: 0.38;
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .water-cup-btn.is-filled .cup-emoji {
-    filter: none;
-    opacity: 1;
-    transform: scale(1.12);
-  }
-  .water-cup-btn {
- background: #F8FAFC;
- border: 1px solid #E2E8F0;
- border-radius: 14px;
- padding: 10px 4px;
- display: flex;
- flex-direction: column;
- align-items: center;
- gap: 4px;
- cursor: pointer;
- transition: all 0.15s ease;
- }
- .water-cup-btn.is-filled {
- background: #F0F9FF;
- border-color: #7DD3FC;
- transform: translateY(-2px);
- box-shadow: 0 4px 10px rgba(14, 165, 233, 0.15);
- }
- .water-cup-btn .cup-label {
- font-size: 0.72rem;
- font-weight: 800;
- color: #64748B;
- }
- .water-cup-btn.is-filled .cup-label {
- color: #0284C7;
- }
- .water-stepper-actions {
- display: flex;
- gap: 10px;
- margin-bottom: 14px;
- }
- .btn-water-minus {
- flex: 1;
- background: #F1F5F9;
- color: #475569;
- border: none;
- border-radius: 14px;
- padding: 11px;
- font-size: 0.84rem;
- font-weight: 700;
- cursor: pointer;
- transition: background 0.15s ease;
- }
- .btn-water-minus:disabled {
- opacity: 0.5;
- cursor: not-allowed;
- }
- .btn-water-plus {
- flex: 2;
- background: #0284C7;
- color: #FFFFFF;
- border: none;
- border-radius: 14px;
- padding: 11px;
- font-size: 0.84rem;
- font-weight: 800;
- cursor: pointer;
- box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
- transition: background 0.15s ease, transform 0.15s ease;
- }
- .btn-water-plus:hover {
- background: #0369A1;
- transform: translateY(-1px);
- }
- .btn-save-water {
- width: 100%;
- background: #0284C7;
- color: #FFFFFF;
- border: none;
- border-radius: 16px;
- padding: 12px;
- font-size: 0.88rem;
- font-weight: 800;
- cursor: pointer;
- box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
- transition: background 0.15s ease;
- }
- .btn-save-water:hover {
- background: #0369A1;
- }
+ 
 
 
  /* ── Daily Health Journal Modal (Clean Reference Replica - Pastel & Soft) ── */
@@ -3571,131 +3665,18 @@
     border-color: #FDA4AF;
     box-shadow: 0 0 0 2.5px rgba(253, 164, 175, 0.2);
   }
-	/* ── CYCLE HISTORY SECTION (MATCHING REFERENCE IMAGE) ── */
-	.cycle-history-section {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-		margin-top: 10px;
-		margin-bottom: 22px;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.cycle-history-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0 4px;
-		margin-bottom: 2px;
-	}
-
-	.ch-section-title {
-		font-size: 1.18rem;
-		font-weight: 800;
-		color: #0F172A;
-		margin: 0;
-		letter-spacing: -0.015em;
-	}
-
-	.ch-header-right {
+	.ch-card-main {
 		display: flex;
 		align-items: center;
 		gap: 12px;
-	}
-
-	.ch-status-pill {
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-		background: #DCFCE7;
-		color: #15803D;
-		padding: 4px 10px;
-		border-radius: 999px;
-		font-size: 0.72rem;
-		font-weight: 700;
-		line-height: 1;
-	}
-
-	.btn-ch-see-all {
-		background: transparent;
-		border: none;
-		color: #2563EB;
-		font-size: 0.84rem;
-		font-weight: 700;
-		cursor: pointer;
-		padding: 2px 4px;
-		transition: opacity 0.15s ease, transform 0.15s ease;
-	}
-
-	.btn-ch-see-all:hover {
-		opacity: 0.8;
-		transform: translateX(1px);
-	}
-
-	.ch-empty-card {
-		background: #FFFFFF;
-		border-radius: 18px;
-		border: 1.5px dashed #E2E8F0;
-		padding: 24px 18px;
-		text-align: center;
-	}
-
-	.ch-empty-text {
-		font-size: 0.82rem;
-		color: #64748B;
-		line-height: 1.5;
-		margin: 0;
-	}
-
-	.ch-empty-text strong {
-		color: #E11D48;
-	}
-
-	.cycle-history-list {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		width: 100%;
-	}
-
-	.cycle-history-card {
-		background: #FFFFFF;
-		border-radius: 20px;
-		padding: 16px 18px;
-		box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-		border: 1px solid #F1F5F9;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		cursor: pointer;
-		text-align: left;
-		transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
-		box-sizing: border-box;
-		-webkit-tap-highlight-color: transparent;
-	}
-
-	.cycle-history-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
-		border-color: #E2E8F0;
-	}
-
-	.cycle-history-card:active {
-		transform: translateY(0);
-	}
-
-	.ch-card-left {
-		display: flex;
-		align-items: center;
-		gap: 14px;
+		flex: 1;
+		min-width: 0;
 	}
 
 	.ch-icon-bubble {
-		width: 44px;
-		height: 44px;
-		border-radius: 14px;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
 		background: #FFF1F2;
 		display: flex;
 		align-items: center;
@@ -3706,99 +3687,357 @@
 	.ch-info {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
-	}
-
-	.ch-day-title {
-		font-size: 1.05rem;
-		font-weight: 800;
-		color: #0F172A;
-		margin: 0;
-		letter-spacing: -0.01em;
-		line-height: 1.2;
-	}
-
-	.ch-phase-subtitle {
-		font-size: 0.78rem;
-		font-weight: 500;
-		color: #64748B;
-		line-height: 1.2;
-	}
-
-	.ch-next-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		margin-top: 5px;
-		font-size: 0.74rem;
-		font-weight: 700;
-		color: #059669;
-	}
-
-	.ch-check-dot {
-		width: 15px;
-		height: 15px;
-		border-radius: 50%;
-		background: #10B981;
-		color: #FFFFFF;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-	}
-
-	.ch-card-right {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		flex-shrink: 0;
-	}
-
-	.ch-date-text {
-		font-size: 0.84rem;
-		font-weight: 600;
-		color: #64748B;
-	}
-
-	.ch-chevron {
-		color: #94A3B8;
-		transition: transform 0.15s ease;
-	}
-
-	.cycle-history-card:hover .ch-chevron {
-		transform: translateX(2px);
-		color: #64748B;
-	}
-
-	/* History Modal Items Styling */
-	.history-item-row-card {
-		background: #FFFFFF;
-		border-radius: 18px;
-		padding: 14px 16px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-		border: 1px solid #F1F5F9;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		box-sizing: border-box;
+		gap: 3px;
+		min-width: 0;
+		flex: 1;
 	}
 
 	.m-cycle-title-row {
 		display: flex;
 		align-items: center;
 		gap: 6px;
+		flex-wrap: nowrap;
+	}
+
+	.ch-day-title {
+		font-size: 0.96rem;
+		font-weight: 800;
+		color: #0F172A;
+		margin: 0;
+		letter-spacing: -0.01em;
+		line-height: 1.2;
+		white-space: nowrap;
+	}
+
+	.m-cycle-meta-row {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		font-size: 0.74rem;
+		line-height: 1.2;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.m-dates-sub {
-		font-size: 0.72rem;
+		font-weight: 600;
+		color: #64748B;
+	}
+
+	.m-dot-sep {
+		color: #CBD5E1;
+		font-size: 0.65rem;
+	}
+
+	.ch-phase-subtitle {
+		font-weight: 500;
 		color: #94A3B8;
+	}
+
+	/* History Modal Items Styling */
+	.history-item-row-card {
+		background: #FFFFFF;
+		border-radius: 16px;
+		padding: 12px 14px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+		border: 1px solid #F1F5F9;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		width: 100%;
+		box-sizing: border-box;
+		transition: all 0.15s ease;
+	}
+
+	.history-item-row-card:hover {
+		border-color: #FECDD3;
+		box-shadow: 0 4px 12px rgba(244, 63, 94, 0.06);
 	}
 
 	.m-actions-right {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 6px;
+		flex-shrink: 0;
+	}
+
+	.btn-edit-cycle {
+		width: 32px;
+		height: 32px;
+		border-radius: 10px;
+		background: #F8FAFC;
+		border: 1px solid #E2E8F0;
+		color: #64748B;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: all 0.15s ease;
+		padding: 0;
+	}
+
+	.btn-edit-cycle:hover {
+		background: #F1F5F9;
+		color: #0F172A;
+		border-color: #CBD5E1;
+		transform: scale(1.08);
+	}
+
+	.btn-add-past-cycle {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 12px 16px;
+		background: #FFF5F7;
+		border: 1.5px dashed #FDA4AF;
+		border-radius: 14px;
+		color: #E11D48;
+		font-size: 0.82rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: all 0.15s ease;
+		margin-top: 14px;
+		box-sizing: border-box;
+	}
+
+	.btn-add-past-cycle:hover {
+		background: #FFE4E6;
+		border-color: #E11D48;
+		transform: translateY(-1px);
+	}
+
+	/* ── Cycle Length Trend Chart (Soft Pink Capsule Theme) ── */
+	/* ── Cycle Length Trend Chart (Soft Pink Capsule Theme) ── */
+	.cycle-chart-card {
+		background: #FFFFFF;
+		border-radius: 24px;
+		padding: 22px 20px 18px;
+		box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+		border: 1.5px solid #F1F5F9;
+		margin-top: 18px;
+		margin-bottom: 24px;
+		box-sizing: border-box;
+	}
+
+	.chart-header-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 24px;
+	}
+
+	.chart-title {
+		font-size: 1.15rem;
+		font-weight: 800;
+		color: #0F172A;
+		margin: 0;
+		letter-spacing: -0.015em;
+	}
+
+	.chart-range-pill {
+		position: relative;
+		background: #FFF1F2;
+		border: 1px solid #FECDD3;
+		border-radius: 12px;
+		padding: 4px 10px;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.chart-range-pill:hover {
+		background: #FFE4E6;
+		border-color: #FDA4AF;
+	}
+
+	.chart-filter-select {
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		background: transparent;
+		border: none;
+		outline: none;
+		font-family: inherit;
+		font-size: 0.78rem;
+		font-weight: 700;
+		color: #E11D48;
+		cursor: pointer;
+		padding: 2px 2px 2px 0;
+		margin: 0;
+	}
+
+	.dropdown-arrow-icon {
+		pointer-events: none;
+		color: #E11D48;
+		flex-shrink: 0;
+	}
+
+	.chart-bars-container {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		gap: clamp(10px, 3.2vw, 16px); /* Jarak rapat, proporsional, tidak terlalu jauh */
+		height: 168px;
+		padding: 30px 10px 0;
+		position: relative;
+		box-sizing: border-box;
+		max-width: 100%;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.chart-bars-container::-webkit-scrollbar {
+		display: none;
+	}
+
+	.chart-col {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		cursor: pointer;
+		position: relative;
+		user-select: none;
+		outline: none;
+		width: 32px;
+		flex-shrink: 0;
+	}
+
+	/* Tooltip Balon Hitam Elegan (Matches Reference Image) */
+	.chart-tooltip-bubble {
+		position: absolute;
+		bottom: calc(100% + 8px);
+		background: #0F172A;
+		color: #FFFFFF;
+		font-size: 0.68rem;
+		font-weight: 700;
+		padding: 5px 9px;
+		border-radius: 8px;
+		white-space: nowrap;
+		box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);
+		z-index: 10;
+		pointer-events: none;
+		animation: popIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.chart-tooltip-bubble::after {
+		content: '';
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-top: 5px solid #0F172A;
+	}
+
+	@keyframes popIn {
+		0% { transform: scale(0.85) translateY(4px); opacity: 0; }
+		100% { transform: scale(1) translateY(0); opacity: 1; }
+	}
+
+	/* Capsule Shape (Soft Pink Bar - Menyatu Tanpa Jarak) */
+	.capsule-track {
+		width: 24px;
+		height: 116px;
+		background: #FFF1F2;
+		border: 1.5px solid #FECDD3;
+		border-radius: 999px;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		overflow: hidden;
+		padding: 0; /* Tanpa jarak antara isi dan border bar */
+		box-sizing: border-box;
+		position: relative;
+		transition: all 0.2s ease;
+	}
+
+	.chart-col:hover .capsule-track,
+	.chart-col.is-active .capsule-track {
+		border-color: #FDA4AF;
+		background: #FFF1F2;
+	}
+
+	.capsule-fill {
+		width: 100%;
+		border-radius: 999px 999px 0 0;
+		background: #FDA4AF;
+		transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+		margin: 0;
+		padding: 0;
+	}
+
+	.chart-col.is-active .capsule-fill {
+		background: #FB7185;
+		box-shadow: none;
+	}
+
+	.datepicker-backdrop {
+		z-index: 100005 !important;
+	}
+
+	.col-days-label {
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: #64748B;
+		margin-top: 8px;
+		transition: color 0.15s ease;
+	}
+
+	.chart-col.is-active .col-days-label {
+		color: #E11D48;
+		font-weight: 800;
+	}
+
+	/* Bottom Month Navigation */
+	.chart-bottom-nav {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+		margin-top: 18px;
+		padding-top: 14px;
+		border-top: 1px solid #F1F5F9;
+	}
+
+	.chart-nav-btn {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: #FFFFFF;
+		border: 1.5px solid #E2E8F0;
+		color: #64748B;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.chart-nav-btn:hover {
+		background: #F8FAFC;
+		color: #0F172A;
+		border-color: #CBD5E1;
+	}
+
+	.chart-nav-btn.is-disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	.chart-month-range-text {
+		font-size: 1.05rem;
+		font-weight: 800;
+		color: #0F172A;
+		letter-spacing: -0.01em;
 	}
 
 </style>
