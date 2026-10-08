@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { couple } from '$lib/data/content.js';
   import { togglePlayPause, subscribeAudio } from '$lib/audioManager.js';
+  import EmojiChallengeModal from './EmojiChallengeModal.svelte';
 
   let { onBack } = $props();
 
@@ -20,6 +21,7 @@
   let taskCount = $state(15);
   let activeBoxId = $state('today');
   let isNotifOpen = $state(false);
+  let isEmojiModalOpen = $state(false);
 
   onMount(() => {
     try {
@@ -55,14 +57,14 @@
       isActiveFeature: false
     },
     {
-      id: 'podomoro',
-      title: 'Podomoro',
-      count: '0',
-      label: 'Task',
-      badge: 'SOON',
+      id: 'emoji_challenge',
+      title: 'Emoji Challenge',
+      count: 'PLAY',
+      label: 'Game',
+      badge: 'PLAY',
       svgIcon: '/stumble_maggie.svg',
-      sub: 'Ide Fitur Baru',
-      isActiveFeature: false
+      sub: 'Tiru Wajah & Tangan',
+      isActiveFeature: true
     }
   ];
 
@@ -76,8 +78,14 @@
 
   function handleBoxClick(box) {
     activeBoxId = box.id;
+    if (box.id === 'emoji_challenge') {
+      isEmojiModalOpen = true;
+      return;
+    }
     if (box.href) {
       window.location.hash = box.href;
+    } else {
+      isNotifOpen = true;
     }
   }
 </script>
@@ -275,6 +283,12 @@
       </div>
     </button>
   {/if}
+
+  <!-- Emoji & Gesture Challenge Modal Game -->
+  <EmojiChallengeModal
+    isOpen={isEmojiModalOpen}
+    onClose={() => isEmojiModalOpen = false}
+  />
 </div>
 
 <style>
