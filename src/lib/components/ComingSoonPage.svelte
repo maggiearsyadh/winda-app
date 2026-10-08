@@ -285,10 +285,12 @@
   {/if}
 
   <!-- Emoji & Gesture Challenge Modal Game -->
-  <EmojiChallengeModal
-    isOpen={isEmojiModalOpen}
-    onClose={() => isEmojiModalOpen = false}
-  />
+  {#if isEmojiModalOpen}
+    <EmojiChallengeModal
+      isOpen={isEmojiModalOpen}
+      onClose={() => isEmojiModalOpen = false}
+    />
+  {/if}
 </div>
 
 <style>

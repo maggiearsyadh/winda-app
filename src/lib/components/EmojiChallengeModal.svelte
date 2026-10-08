@@ -391,8 +391,18 @@
       animFrameId = null;
     }
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(track => {
+        try {
+          track.stop();
+        } catch (e) {}
+      });
       stream = null;
+    }
+    if (videoElement) {
+      try {
+        videoElement.pause();
+        videoElement.srcObject = null;
+      } catch (e) {}
     }
     cameraActive = false;
   }
@@ -556,7 +566,7 @@
   /* ── Modal Card Container (Clean White & Rounded) ── */
   .emoji-game-modal-card {
     width: 100%;
-    max-width: 440px;
+    max-width: 490px;
     max-height: 94dvh;
     background: #FFFFFF;
     border-radius: 28px;
@@ -664,12 +674,19 @@
   .camera-viewport-card {
     position: relative;
     width: 100%;
-    height: 380px;
+    height: 480px;
     background: #111827;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media (max-width: 640px) {
+    .camera-viewport-card {
+      height: 54dvh;
+      min-height: 420px;
+    }
   }
 
   .camera-video {
