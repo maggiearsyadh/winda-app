@@ -474,20 +474,13 @@
           muted
         ></video>
 
-        <!-- Floating Target Mission Banner at Top of Video -->
+        <!-- Floating Target Mission at Top of Video (Minimalist: Emoji Only) -->
         {#if cameraActive}
           <div class="mission-hud-banner" class:is-holding={isMatch}>
-            <div class="mission-intro-label">Tirukan pose ini An hahahaha (TAHAN 1 DETIK):</div>
-            <div class="mission-targets-row">
-              <div class="target-chip">
-                <span class="target-emoji">{currentTarget.emotion.emoji}</span>
-                <span class="target-name">{currentTarget.emotion.label}</span>
-              </div>
+            <div class="mission-emojis-row">
+              <span class="target-emoji">{currentTarget.emotion.emoji}</span>
               <span class="target-plus">+</span>
-              <div class="target-chip">
-                <span class="target-emoji">{currentTarget.gesture.emoji}</span>
-                <span class="target-name">{currentTarget.gesture.label}</span>
-              </div>
+              <span class="target-emoji">{currentTarget.gesture.emoji}</span>
             </div>
 
             <!-- Hold Progress Bar -->
@@ -762,77 +755,60 @@
     cursor: pointer;
   }
 
-  /* ── Mission HUD Banner (Top of Video) ── */
+  /* ── Floating Target Mission (Minimalist: Emoji Only) ── */
   .mission-hud-banner {
     position: absolute;
-    top: 14px;
-    left: 14px;
-    right: 14px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 20px;
-    padding: 10px 14px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    top: 16px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: max-content;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     z-index: 5;
-    transition: transform 0.18s ease, border 0.18s ease;
-    border: 2px solid transparent;
+    pointer-events: none;
+    transition: transform 0.18s ease;
   }
 
   .mission-hud-banner.is-holding {
-    border-color: #10B981;
-    transform: scale(1.02);
+    transform: scale(1.08);
   }
 
-  .mission-intro-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    color: #6B7280;
-  }
-
-  .mission-targets-row {
+  .mission-emojis-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-
-  .target-chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #F3F4F6;
-    padding: 4px 10px;
+    gap: 12px;
+    padding: 6px 18px;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
     border-radius: 999px;
-    border: 1px solid #E5E7EB;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 
   .target-emoji {
-    font-size: 1.25rem;
-  }
-
-  .target-name {
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: #111827;
+    font-size: 2.1rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
   }
 
   .target-plus {
-    font-size: 0.9rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    color: #9CA3AF;
+    color: rgba(255, 255, 255, 0.85);
   }
 
   .hold-progress-track {
-    width: 100%;
-    height: 7px;
-    background: #E5E7EB;
+    width: 130px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
     border-radius: 999px;
     overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   }
 
   .hold-progress-fill {
@@ -844,6 +820,7 @@
 
   .hold-progress-fill.is-full {
     background: #10B981;
+    box-shadow: 0 0 10px #10B981;
   }
 
   /* ── Detection Feedback Pills at Bottom of Video ── */
