@@ -48,9 +48,9 @@
     </div>
   </a>
 
-  <!-- Right Card: QUIZ ABOUT ED -->
+  <!-- Right Card: CUSTOMIZE CHARACTER -->
   <article class="cream-card quiz-card">
-    <h2 class="card-title-main text-center">Play Quiz</h2>
+    <h2 class="card-title-main text-center">Customize Character </h2>
 
     <!-- Interactive dice playground -->
     <button
@@ -58,7 +58,7 @@
       class="dice-playground"
       class:rolling={isRolling}
       onclick={handleDiceClick}
-      aria-label="Kocok dadu dan buka kuis cinta"
+      aria-label="Buka karakter"
     >
       {#each diceList as dice}
         <div
