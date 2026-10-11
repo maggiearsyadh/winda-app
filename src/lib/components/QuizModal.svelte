@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import confetti from 'canvas-confetti';
+  import ForestRunnerGame from './ForestRunnerGame.svelte';
 
   let { isOpen = $bindable(false), onClose } = $props();
 
@@ -175,6 +176,11 @@
   function goToCustomize() {
     playSuccessChime();
     currentScreen = 'customize';
+  }
+
+  function goToRunner() {
+    playSuccessChime();
+    currentScreen = 'runner';
   }
 
   function goBackToSelection() {
@@ -411,18 +417,39 @@
             {/each}
           </div>
 
-          <!-- Bottom CTA to Customize -->
+          <!-- Bottom CTA to Customize & Quick Play -->
           <div class="who-footer-cta">
             <button
               type="button"
               class="btn-start-customize"
               onclick={goToCustomize}
             >
-              <span>Kustomisasi Karakter</span>
+              <span>Customize</span>
               <span class="cta-arrow">→</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-quick-runner"
+              onclick={goToRunner}
+              title="Langsung Main Endless Runner"
+            >
+              <span>Start Run</span>
             </button>
           </div>
         </div>
+
+      {:else if currentScreen === 'runner'}
+        <!-- ── SCREEN 3: ENDLESS FOREST RUNNER MINI-GAME ── -->
+        <ForestRunnerGame
+          {currentBody}
+          {currentHat}
+          {currentOutfit}
+          {currentHatStyle}
+          {currentOutfitStyle}
+          {characterName}
+          onBack={() => currentScreen = 'customize'}
+        />
 
       {:else}
         <!-- ── SCREEN 2: DRESS-UP CUSTOMIZATION STUDIO ── -->
@@ -463,11 +490,24 @@
           {/if}
         </div>
 
-        <!-- Save Button with Orange Checkmark Circle (Matching Reference) -->
-        <button type="button" class="stage-save-btn" onclick={handleSave} aria-label="Simpan karakter">
-          <span class="save-label">Save</span>
-          <span class="save-check-circle">✓</span>
-        </button>
+        <!-- Action Buttons: Play Runner Game & Save -->
+        <div class="stage-actions-group">
+          <button
+            type="button"
+            class="stage-play-runner-btn"
+            onclick={goToRunner}
+            title="Mainkan Karakter di Endless Forest Runner"
+          >
+            <span class="runner-btn-icon">🎮</span>
+            <span class="runner-btn-text">Main</span>
+          </button>
+
+          <!-- Save Button with Orange Checkmark Circle (Matching Reference) -->
+          <button type="button" class="stage-save-btn" onclick={handleSave} aria-label="Simpan karakter">
+            <span class="save-label">Save</span>
+            <span class="save-check-circle">✓</span>
+          </button>
+        </div>
       </header>
 
       <!-- ── SECTION 2: UPPER CHARACTER PREVIEW STAGE ── -->
@@ -819,8 +859,10 @@
 
   .who-footer-cta {
     display: flex;
-    justify-content: center;
-    padding-top: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 6px;
   }
 
   .btn-start-customize {
@@ -1094,6 +1136,58 @@
     max-width: 140px;
     outline: none;
     box-shadow: 0 4px 12px rgba(234, 88, 12, 0.18);
+  }
+
+  .stage-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stage-play-runner-btn {
+    background: #DCFCE7;
+    color: #15803D;
+    border: 1.5px solid #86EFAC;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.18);
+    transition: all 0.15s ease;
+  }
+
+  .stage-play-runner-btn:hover {
+    background: #BBF7D0;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  }
+
+  .btn-quick-runner {
+    background: transparent;
+    color: #059669;
+    border: 1.5px solid #A7F3D0;
+    border-radius: 999px;
+    padding: 11px 20px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .btn-quick-runner:hover {
+    background: #ECFDF5;
+    border-color: #34D399;
+    transform: translateY(-1px);
   }
 
   /* Save Button with Orange Checkmark Circle (Matching Reference Image) */
