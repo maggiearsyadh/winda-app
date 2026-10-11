@@ -23,8 +23,8 @@
   const GAME_WIDTH = 560; // virtual width
   const GAME_HEIGHT = 340; // virtual height
   const GROUND_Y = 240; // player feet baseline on ground
-  const GRAVITY = 0.58;
-  const JUMP_FORCE = -11.5;
+  const GRAVITY = 0.38; // lowered from 0.58 for floatier, farther jump
+  const JUMP_FORCE = -10.5; // tuned jump force
   const PLAYER_WIDTH = 58;
   const PLAYER_HEIGHT = 92;
 
@@ -40,7 +40,7 @@
   // ── Game Loop Variables ──
   let animationFrameId = null;
   let lastTimestamp = 0;
-  let gameSpeed = $state(4.2);
+  let gameSpeed = $state(3.0); // reduced from 4.2 for more comfortable reaction time
   let distanceCounter = 0;
 
   // Parallax offsets
@@ -160,8 +160,8 @@
     if (e.code === 'Space' || e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
       isHoldingJump = false;
       // Cut jump short if released early for responsive jump control
-      if (velocityY < -4) {
-        velocityY *= 0.55;
+      if (velocityY < -3) {
+        velocityY *= 0.5;
       }
     } else if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
       isDucking = false;
@@ -200,8 +200,8 @@
       e.stopPropagation();
     }
     isHoldingJump = false;
-    if (velocityY < -4) {
-      velocityY *= 0.55;
+    if (velocityY < -3) {
+      velocityY *= 0.5;
     }
   }
 
@@ -257,7 +257,7 @@
     scoreDistance = 0;
     distanceCounter = 0;
     berriesCollected = 0;
-    gameSpeed = 4.2;
+    gameSpeed = 3.0; // comfortable relaxed base speed
     obstacles = [];
     collectibles = [];
     dustParticles = [];
@@ -289,12 +289,12 @@
     checkCollisions();
 
     // Score and speed increment
-    distanceCounter += 0.28 * dt;
+    distanceCounter += 0.22 * dt;
     scoreDistance = Math.floor(distanceCounter);
 
-    // Subtle speed scaling
-    if (scoreDistance > 250) {
-      gameSpeed = 4.2 + Math.min((scoreDistance - 250) * 0.0035, 3.2);
+    // Subtle gentle speed scaling
+    if (scoreDistance > 300) {
+      gameSpeed = 3.0 + Math.min((scoreDistance - 300) * 0.002, 1.8);
     }
 
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -451,18 +451,18 @@
   }
 
   function checkCollisions() {
-    // Player Hitbox (slightly forgiving for cozy feel)
-    const pX = 65 + 10;
-    const pY = playerY + 8;
-    const pW = PLAYER_WIDTH - 20;
-    const pH = (isDucking ? PLAYER_HEIGHT * 0.6 : PLAYER_HEIGHT) - 14;
+    // Player Hitbox (generous, forgiving for cozy feel)
+    const pX = 65 + 14;
+    const pY = playerY + 12;
+    const pW = PLAYER_WIDTH - 28;
+    const pH = (isDucking ? PLAYER_HEIGHT * 0.6 : PLAYER_HEIGHT) - 18;
 
     // Check Obstacles
     for (const ob of obstacles) {
-      const oX = ob.x + 6;
-      const oY = ob.y + 4;
-      const oW = ob.width - 12;
-      const oH = ob.height - 8;
+      const oX = ob.x + 8;
+      const oY = ob.y + 6;
+      const oW = ob.width - 16;
+      const oH = ob.height - 12;
 
       if (
         pX < oX + oW &&
