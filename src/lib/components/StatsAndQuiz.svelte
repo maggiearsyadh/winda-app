@@ -50,7 +50,7 @@
 
   <!-- Right Card: CUSTOMIZE CHARACTER -->
   <article class="cream-card quiz-card">
-    <h2 class="card-title-main text-center">Customize Character </h2>
+    <h2 class="card-title-main text-center">Mini Game </h2>
 
     <!-- Interactive dice playground -->
     <button

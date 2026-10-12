@@ -9,7 +9,8 @@
     currentHatStyle,
     currentOutfitStyle,
     characterName = 'Pip',
-    onBack
+    onBack,
+    onSwitchGame
   } = $props();
 
   // ── Game States: 'ready' | 'playing' | 'gameover' ──
@@ -774,6 +775,11 @@
             <button type="button" class="btn-play-action" onclick={restartGame}>
               <span>Try Again 🔄</span>
             </button>
+            {#if onSwitchGame}
+              <button type="button" class="btn-secondary-action" onclick={onSwitchGame}>
+                <span>Ganti Game 🎮</span>
+              </button>
+            {/if}
             <button type="button" class="btn-secondary-action" onclick={onBack}>
               <span>Ganti Baju 👗</span>
             </button>

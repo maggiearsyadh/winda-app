@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import confetti from 'canvas-confetti';
   import ForestRunnerGame from './ForestRunnerGame.svelte';
+  import SpaceShooterGame from './SpaceShooterGame.svelte';
 
   let { isOpen = $bindable(false), onClose } = $props();
 
@@ -178,9 +179,19 @@
     currentScreen = 'customize';
   }
 
+  function goToGamesHub() {
+    playSuccessChime();
+    currentScreen = 'games-hub';
+  }
+
   function goToRunner() {
     playSuccessChime();
     currentScreen = 'runner';
+  }
+
+  function goToShooter() {
+    playSuccessChime();
+    currentScreen = 'shooter';
   }
 
   function goBackToSelection() {
@@ -431,16 +442,120 @@
             <button
               type="button"
               class="btn-quick-runner"
-              onclick={goToRunner}
-              title="Langsung Main Endless Runner"
+              onclick={goToGamesHub}
+              title="Pilih Mini Game Seru"
             >
-              <span>Start Run</span>
+              <span>🎮 Play Games</span>
             </button>
           </div>
         </div>
 
+      {:else if currentScreen === 'games-hub'}
+        <!-- ── SCREEN 3: ARCADE GAME SELECTION HUB ── -->
+        <div class="games-hub-screen">
+          <header class="games-hub-header">
+            <button
+              type="button"
+              class="stage-nav-btn"
+              onclick={() => currentScreen = 'customize'}
+              aria-label="Kembali ke studio"
+              title="Kembali"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <div class="games-hub-title-box">
+              <h2 class="games-hub-title">Arcade Zone Winda</h2>
+            </div>
+            <button
+              type="button"
+              class="stage-nav-btn stage-close-btn"
+              onclick={() => isOpen = false}
+              aria-label="Tutup"
+              title="Tutup"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </header>
+
+          <!-- Current Active Character Info Pill -->
+          <!-- <div class="active-pilot-pill">
+            <div class="pilot-mini-avatar">
+              <img src={currentBody.file} alt={currentBody.name} class="mini-char-img" />
+              {#if currentOutfit && currentOutfit.file}
+                <img src={currentOutfit.file} alt={currentOutfit.name} class="mini-char-img mini-char-outfit" style={currentOutfitStyle} />
+              {/if}
+              {#if currentHat && currentHat.file}
+                <img src={currentHat.file} alt={currentHat.name} class="mini-char-img mini-char-hat" style={currentHatStyle} />
+              {/if}
+            </div>
+            <div class="pilot-info">
+              <span class="pilot-tag">Karakter Pilihanmu</span>
+              <span class="pilot-name">{characterName} ({currentBody.name.split(' ')[0]})</span>
+            </div>
+            <button type="button" class="btn-change-outfit-mini" onclick={() => currentScreen = 'customize'}>
+              Kostum 👗
+            </button>
+          </div> -->
+
+          <!-- Game Cards Container -->
+          <div class="games-cards-grid">
+            <!-- Game 1: Endless Forest Runner -->
+            <div class="arcade-game-card runner-card" onclick={goToRunner} role="button" tabindex="0">
+              <div class="arcade-card-top">
+                <!-- <span class="card-genre-pill green-pill">🌲 2D RUNNER</span> -->
+               
+              </div>
+              <div class="card-visual-banner forest-visual">
+                <span class="card-hero-icon">🏃💨</span>
+                <div class="card-mini-scenery">🍄 &nbsp; 🐾 &nbsp; 🍓</div>
+              </div>
+              <div class="card-details">
+                <h3 class="card-game-title">Forest Runner</h3>
+                <p class="card-game-desc">Lompat dan lariiiii, kumpulkan stroberi bersama {characterName}!</p>
+                <div class="card-tag-row">
+                  <span class="card-feature-tag">Lompat & Tunduk</span>
+                  <span class="card-feature-tag">Stroberi +50</span>
+                  <span class="card-feature-tag">Cute Dino Vibe</span>
+                </div>
+                <button type="button" class="btn-launch-game green-launch">
+                  <span>Mulai Lari </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Game 2: Galaxy Retro Space Shooter -->
+            <div class="arcade-game-card shooter-card" onclick={goToShooter} role="button" tabindex="0">
+              <div class="arcade-card-top">
+                <!-- <span class="card-genre-pill neon-pill">🚀 1980s RETRO SHOOTER</span> -->
+               
+              </div>
+              <div class="card-visual-banner space-visual">
+                <span class="card-hero-icon">🚀💥</span>
+                <div class="card-mini-scenery">👾 &nbsp; ⚡ &nbsp; 🛸</div>
+              </div>
+              <div class="card-details">
+                <h3 class="card-game-title">Galaxy Retro Shooter</h3>
+                <p class="card-game-desc">{characterName} mengemudi pesawat tempur! Tembak invasi alien & ambil laser power-up!</p>
+                <div class="card-tag-row">
+                  <span class="card-feature-tag">Pilot Avatar</span>
+                  <span class="card-feature-tag">Triple Laser ⚡</span>
+                  <span class="card-feature-tag">Boss Wave 👾</span>
+                </div>
+                <button type="button" class="btn-launch-game neon-launch">
+                  <span>Terbangkan Pesawat </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       {:else if currentScreen === 'runner'}
-        <!-- ── SCREEN 3: ENDLESS FOREST RUNNER MINI-GAME ── -->
+        <!-- ── SCREEN 4: ENDLESS FOREST RUNNER MINI-GAME ── -->
         <ForestRunnerGame
           {currentBody}
           {currentHat}
@@ -448,7 +563,21 @@
           {currentHatStyle}
           {currentOutfitStyle}
           {characterName}
-          onBack={() => currentScreen = 'customize'}
+          onBack={() => currentScreen = 'games-hub'}
+          onSwitchGame={() => currentScreen = 'shooter'}
+        />
+
+      {:else if currentScreen === 'shooter'}
+        <!-- ── SCREEN 5: GALAXY RETRO SHOOTER MINI-GAME ── -->
+        <SpaceShooterGame
+          {currentBody}
+          {currentHat}
+          {currentOutfit}
+          {currentHatStyle}
+          {currentOutfitStyle}
+          {characterName}
+          onBack={() => currentScreen = 'games-hub'}
+          onSwitchGame={() => currentScreen = 'runner'}
         />
 
       {:else}
@@ -495,11 +624,11 @@
           <button
             type="button"
             class="stage-play-runner-btn"
-            onclick={goToRunner}
-            title="Mainkan Karakter di Endless Forest Runner"
+            onclick={goToGamesHub}
+            title="Pilih Mini Game Seru"
           >
             <span class="runner-btn-icon">🎮</span>
-            <span class="runner-btn-text">Main</span>
+            <span class="runner-btn-text">Games</span>
           </button>
 
           <!-- Save Button with Orange Checkmark Circle (Matching Reference) -->
@@ -1381,5 +1510,329 @@
   @keyframes toastPop {
     from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
     to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+
+  /* ── 🕹️ ARCADE GAMES HUB SCREEN ── */
+  .games-hub-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: #FDFBF7;
+    border-radius: 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .games-hub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    background: #FFFFFF;
+    border-bottom: 1.5px solid #F1ECE1;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .games-hub-title-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .games-hub-badge {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #D97706;
+    background: #FEF3C7;
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+
+  .games-hub-title {
+    margin: 3px 0 0;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #1E293B;
+  }
+
+  .stage-close-btn {
+    color: #94A3B8;
+  }
+
+  .stage-close-btn:hover {
+    color: #EF4444;
+    background: #FEE2E2;
+  }
+
+  /* Active Character Mini Pill */
+  .active-pilot-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 18px 8px;
+    padding: 10px 14px;
+    background: #FFFFFF;
+    border: 1.5px solid #EAE2D5;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  }
+
+  .pilot-mini-avatar {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #FFF7ED;
+    border: 1.5px solid #FED7AA;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-char-img {
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+  }
+
+  .mini-char-outfit {
+    position: absolute;
+    width: 65%;
+    top: 36%;
+    left: 17%;
+  }
+
+  .mini-char-hat {
+    position: absolute;
+    width: 60%;
+    top: 4%;
+    left: 20%;
+  }
+
+  .pilot-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .pilot-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pilot-name {
+    font-size: 0.92rem;
+    font-weight: 900;
+    color: #1E293B;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-change-outfit-mini {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .btn-change-outfit-mini:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+  }
+
+  /* Games Cards Grid */
+  .games-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 18px 24px;
+  }
+
+  .arcade-game-card {
+    background: #FFFFFF;
+    border-radius: 22px;
+    border: 2px solid #EAE2D5;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .arcade-game-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  }
+
+  .runner-card:hover {
+    border-color: #10B981;
+  }
+
+  .shooter-card:hover {
+    border-color: #6366F1;
+  }
+
+  .arcade-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 6px;
+    background: #FFFFFF;
+  }
+
+  .card-genre-pill {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .green-pill {
+    background: #DCFCE7;
+    color: #15803D;
+  }
+
+  .neon-pill {
+    background: #EEF2FF;
+    color: #4F46E5;
+  }
+
+  .card-star-badge {
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: #059669;
+    background: #ECFDF5;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .neon-badge {
+    color: #7C3AED;
+    background: #F5F3FF;
+  }
+
+  .card-visual-banner {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .forest-visual {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%);
+    border-top: 1px solid #D1FAE5;
+    border-bottom: 1px solid #D1FAE5;
+  }
+
+  .space-visual {
+    background: radial-gradient(circle at 70% 30%, #312E81 0%, #1E1B4B 60%, #0F172A 100%);
+    border-top: 1px solid #3730A3;
+    border-bottom: 1px solid #3730A3;
+  }
+
+  .card-hero-icon {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+
+  .card-mini-scenery {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    opacity: 0.85;
+  }
+
+  .card-details {
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-game-title {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 900;
+    color: #0F172A;
+  }
+
+  .card-game-desc {
+    margin: 4px 0 10px;
+    font-size: 0.8rem;
+    color: #64748B;
+    line-height: 1.35;
+  }
+
+  .card-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .card-feature-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #475569;
+    background: #F1F5F9;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-launch-game {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 11px 18px;
+    font-size: 0.92rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .green-launch {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #FFFFFF;
+  }
+
+  .green-launch:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+
+  .neon-launch {
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: #FFFFFF;
+  }
+
+  .neon-launch:hover {
+    background: linear-gradient(135deg, #4F46E5, #4338CA);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
   }
 </style>
