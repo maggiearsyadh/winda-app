@@ -1,7 +1,4 @@
 <script>
-  import { onMount } from "svelte";
-  import confetti from "canvas-confetti";
-
   let { isOpen = $bindable(false), onPlayNow, onClose } = $props();
 
   let dontShowAgain = $state(false);
@@ -33,42 +30,31 @@
       const ctx = new AudioCtx();
       const now = ctx.currentTime;
 
-      const freqs = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+      const freqs = [523.25, 659.25, 783.99, 1046.5];
       freqs.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now + i * 0.08);
-        gain.gain.setValueAtTime(0.14, now + i * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.28);
+        osc.frequency.setValueAtTime(freq, now + i * 0.07);
+        gain.gain.setValueAtTime(0.12, now + i * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.25);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now + i * 0.08);
-        osc.stop(now + i * 0.08 + 0.3);
+        osc.start(now + i * 0.07);
+        osc.stop(now + i * 0.07 + 0.28);
       });
     } catch (e) {}
   }
 
   function handlePlayClick() {
     playLaunchChime();
-
-    // Confetti celebration
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#A855F7", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"],
-      });
-    } catch (e) {}
-
     setTimeout(() => {
       if (onPlayNow) {
         onPlayNow(dontShowAgain);
       } else {
         isOpen = false;
       }
-    }, 280);
+    }, 200);
   }
 </script>
 
@@ -78,6 +64,9 @@
   <div
     class="announcement-backdrop"
     onclick={handleBackdropClick}
+    onkeydown={(e) => {
+      if (e.key === "Enter" || e.key === " ") handleBackdropClick(e);
+    }}
     role="dialog"
     aria-modal="true"
     aria-labelledby="announcement-title"
@@ -89,12 +78,12 @@
         type="button"
         class="announcement-close-btn"
         onclick={closeModal}
-        aria-label="Tutup pengumuman"
-        title="Tutup"
+        aria-label="Close"
+        title="Close"
       >
         <svg
-          width="20"
-          height="20"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -107,79 +96,131 @@
         </svg>
       </button>
 
-      <!-- Visual Hero Banner with 3D Glossy Floating Blocks -->
+      <!-- Visual Hero Banner with winda_stumble.svg -->
       <div class="announcement-hero-banner">
         <div class="hero-sparkle-bg"></div>
 
         <!-- Badge -->
         <div class="hero-badge-pill">
-          <!-- <span class="sparkle-icon">✨</span> -->
-          <span>New Game!</span>
+          <span>NEW GAME</span>
         </div>
 
-        <!-- Animated Floating Polyomino Blocks -->
-        <div class="hero-blocks-showcase">
-          <div class="floating-block block-pink">
-            <span class="block-shine"></span>
-          </div>
-          <div class="floating-block block-amber">
-            <span class="block-shine"></span>
-          </div>
-          <div class="floating-block block-cyan">
-            <span class="block-shine"></span>
-          </div>
-          <div class="floating-block block-purple center-hero-poly">
-            <span class="block-shine"></span>
-            <div class="hero-icon-center">🧩</div>
-          </div>
-          <div class="floating-block block-green">
-            <span class="block-shine"></span>
-          </div>
+        <!-- Character Hero (winda_stumble.svg) -->
+        <div class="hero-character-wrap">
+          <img
+            src="/winda_stumble.svg"
+            alt="Winda Stumble"
+            class="hero-character-img"
+          />
         </div>
-
-        <!-- <div class="hero-mini-tags">
-          <span class="mini-tag">🔥 Grid 8×8</span>
-          <span class="mini-tag">⚡ Combo Blast</span>
-          <span class="mini-tag">🐸 Winduy & Maggie</span>
-        </div> -->
       </div>
 
       <!-- Main Body Content -->
       <div class="announcement-body">
         <h2 id="announcement-title" class="announcement-title">
-           Block Blast Puzzle IS HEREE
+          Block Blast Puzzle is here
         </h2>
 
         <p class="announcement-desc">
-           <strong>Arcade Zone Winda</strong>. TAKE A SHORT BRAKE AFTER EXAM
+          <strong>Arcade Zone Winda</strong>. Take a short break after exams,
+          relax, and clear rows and columns on an 8x8 grid.
         </p>
 
         <!-- Feature Points -->
         <div class="feature-bullets">
           <div class="bullet-item">
-            <div class="bullet-icon-box bg-purple-soft">🧩</div>
-            <div class="bullet-text">
-              <strong>Brain teaser refreshing after EXAMS</strong>
-              <span>Play whenever you want.</span>
-            </div>
-          </div>
-
-          <div class="bullet-item">
-            <div class="bullet-icon-box bg-amber-soft">🔥</div>
-            <div class="bullet-text">
-              <strong>Fun Combo Blasts</strong>
-              <span
-                >Fun combination explosions with melodic sounds and exciting
-                particles every time a row explodes.</span
+            <div class="bullet-icon-box bg-purple-soft">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
               >
+                <rect
+                  x="3"
+                  y="3"
+                  width="7"
+                  height="7"
+                  rx="1.5"
+                  fill="currentColor"
+                  fill-opacity="0.3"
+                />
+                <rect
+                  x="14"
+                  y="3"
+                  width="7"
+                  height="7"
+                  rx="1.5"
+                  fill="currentColor"
+                  fill-opacity="0.3"
+                />
+                <rect
+                  x="3"
+                  y="14"
+                  width="7"
+                  height="7"
+                  rx="1.5"
+                  fill="currentColor"
+                  fill-opacity="0.3"
+                />
+                <rect
+                  x="14"
+                  y="14"
+                  width="7"
+                  height="7"
+                  rx="1.5"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+            <div class="bullet-text">
+              <strong>Brain teaser after exams</strong>
+              <span>No time pressure—play casually whenever you want.</span>
             </div>
           </div>
 
           <div class="bullet-item">
-            <div class="bullet-icon-box bg-emerald-soft">🦊</div>
+            <div class="bullet-icon-box bg-amber-soft">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+            </div>
             <div class="bullet-text">
-              <strong>With your favorite characters</strong>
-              <span>Winduy & Maggie cheer you on directly</span>
+              <strong>Chain combo blasts</strong>
+              <span>Clear multiple lines for bonus points and fun sounds.</span>
+            </div>
+          </div>
+
+          <div class="bullet-item">
+            <div class="bullet-icon-box bg-emerald-soft">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <div class="bullet-text">
+              <strong>Your favorite companion</strong>
+              <span>Winduy and Maggie cheer you on with live reactions.</span>
             </div>
           </div>
         </div>
@@ -187,19 +228,18 @@
         <!-- Don't Show Again Checkbox -->
         <label class="dont-show-checkbox">
           <input type="checkbox" bind:checked={dontShowAgain} />
-          <span>Jangan tampilkan lagi</span>
+          <span>Don't show this again</span>
         </label>
 
         <!-- Actions -->
         <div class="announcement-actions">
           <button type="button" class="btn-play-now" onclick={handlePlayClick}>
-            <span class="btn-play-icon">🎮</span>
-            <span>Mainkan Sekarang!</span>
+            <span>Play Now</span>
             <span class="btn-arrow">→</span>
           </button>
 
           <button type="button" class="btn-dismiss" onclick={closeModal}>
-            Nanti Saja
+            Maybe later
           </button>
         </div>
       </div>
@@ -227,7 +267,7 @@
   .announcement-card {
     position: relative;
     width: 100%;
-    max-width: 440px;
+    max-width: 420px;
     background: #ffffff;
     border-radius: 28px;
     box-shadow:
@@ -246,8 +286,8 @@
     top: 14px;
     right: 14px;
     z-index: 10;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.25);
     color: #ffffff;
@@ -269,7 +309,7 @@
   .announcement-hero-banner {
     position: relative;
     background: linear-gradient(135deg, #7c3aed 0%, #9333ea 45%, #c026d3 100%);
-    padding: 28px 20px 22px;
+    padding: 22px 20px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -297,139 +337,49 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     background: rgba(255, 255, 255, 0.22);
     border: 1px solid rgba(255, 255, 255, 0.35);
     color: #ffffff;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 900;
-    letter-spacing: 0.05em;
-    padding: 5px 14px;
+    letter-spacing: 0.08em;
+    padding: 4px 13px;
     border-radius: 999px;
     backdrop-filter: blur(4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     animation: gentlePulse 2s ease-in-out infinite;
   }
 
-  .sparkle-icon {
-    font-size: 0.85rem;
-  }
-
-  /* ── Floating Blocks Showcase ── */
-  .hero-blocks-showcase {
+  /* ── Character Hero Wrap ── */
+  .hero-character-wrap {
     position: relative;
-    width: 220px;
-    height: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
+    width: 100%;
+    height: 155px;
   }
 
-  .floating-block {
-    position: absolute;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-  }
-
-  .block-shine {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 42%;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.55),
-      rgba(255, 255, 255, 0)
-    );
-    border-radius: 10px 10px 0 0;
-    pointer-events: none;
-  }
-
-  .block-pink {
-    background: #f43f5e;
-    left: 12px;
-    top: 8px;
-    transform: rotate(-14deg);
-    animation: floatLeft 3s ease-in-out infinite alternate;
-  }
-
-  .block-amber {
-    background: #f59e0b;
-    left: 54px;
-    top: 24px;
-    transform: rotate(8deg);
-    animation: floatSlow 3.4s ease-in-out infinite alternate;
-  }
-
-  .center-hero-poly {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #8b5cf6;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    z-index: 3;
-    animation: floatCenter 2.6s ease-in-out infinite alternate;
-    box-shadow: 0 10px 24px rgba(139, 92, 246, 0.5);
-  }
-
-  .hero-icon-center {
-    font-size: 1.7rem;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  }
-
-  .block-cyan {
-    background: #06b6d4;
-    right: 52px;
-    top: 22px;
-    transform: rotate(-10deg);
-    animation: floatSlow 3.2s ease-in-out infinite alternate-reverse;
-  }
-
-  .block-green {
-    background: #10b981;
-    right: 12px;
-    top: 6px;
-    transform: rotate(16deg);
-    animation: floatRight 3.1s ease-in-out infinite alternate;
-  }
-
-  /* ── Hero Mini Tags ── */
-  .hero-mini-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .mini-tag {
-    font-size: 0.68rem;
-    font-weight: 800;
-    background: rgba(0, 0, 0, 0.22);
-    color: #f8fafc;
-    padding: 3px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+  .hero-character-img {
+    height: 100%;
+    max-height: 155px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28));
+    animation: gentleFloat 3s ease-in-out infinite alternate;
   }
 
   /* ── Body ── */
   .announcement-body {
-    padding: 22px 24px 20px;
+    padding: 20px 22px 18px;
     display: flex;
     flex-direction: column;
   }
 
   .announcement-title {
-    margin: 0 0 8px;
-    font-size: 1.35rem;
+    margin: 0 0 6px;
+    font-size: 1.28rem;
     font-weight: 900;
     color: #1e1b4b;
     text-align: center;
@@ -438,10 +388,10 @@
   }
 
   .announcement-desc {
-    margin: 0 0 18px;
-    font-size: 0.88rem;
+    margin: 0 0 16px;
+    font-size: 0.85rem;
     color: #475569;
-    line-height: 1.5;
+    line-height: 1.45;
     text-align: center;
   }
 
@@ -454,11 +404,11 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 18px;
-    padding: 12px 14px;
+    padding: 11px 13px;
   }
 
   .bullet-item {
@@ -468,29 +418,31 @@
   }
 
   .bullet-icon-box {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
     flex-shrink: 0;
   }
 
   .bg-purple-soft {
     background: #f3e8ff;
     border: 1px solid #e9d5ff;
+    color: #8b5cf6;
   }
 
   .bg-amber-soft {
     background: #fef3c7;
     border: 1px solid #fde68a;
+    color: #d97706;
   }
 
   .bg-emerald-soft {
     background: #d1fae5;
     border: 1px solid #a7f3d0;
+    color: #059669;
   }
 
   .bullet-text {
@@ -500,13 +452,13 @@
   }
 
   .bullet-text strong {
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     font-weight: 800;
     color: #0f172a;
   }
 
   .bullet-text span {
-    font-size: 0.74rem;
+    font-size: 0.73rem;
     color: #64748b;
     line-height: 1.3;
   }
@@ -517,9 +469,9 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     color: #64748b;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     cursor: pointer;
     user-select: none;
   }
@@ -540,12 +492,12 @@
 
   .btn-play-now {
     width: 100%;
-    padding: 13px 20px;
-    border-radius: 16px;
+    padding: 12px 20px;
+    border-radius: 14px;
     border: none;
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
     color: #ffffff;
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -566,10 +518,6 @@
     transform: translateY(1px);
   }
 
-  .btn-play-icon {
-    font-size: 1.15rem;
-  }
-
   .btn-arrow {
     font-size: 1.1rem;
     transition: transform 0.2s ease;
@@ -581,14 +529,14 @@
 
   .btn-dismiss {
     width: 100%;
-    padding: 10px;
+    padding: 9px;
     background: transparent;
     border: none;
     color: #94a3b8;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 10px;
     transition: all 0.18s ease;
   }
 
@@ -628,39 +576,12 @@
     }
   }
 
-  @keyframes floatCenter {
+  @keyframes gentleFloat {
     0% {
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
     100% {
-      transform: translateY(-7px) scale(1.03);
-    }
-  }
-
-  @keyframes floatLeft {
-    0% {
-      transform: translateY(0) rotate(-14deg);
-    }
-    100% {
-      transform: translateY(-5px) rotate(-10deg);
-    }
-  }
-
-  @keyframes floatRight {
-    0% {
-      transform: translateY(0) rotate(16deg);
-    }
-    100% {
-      transform: translateY(-6px) rotate(20deg);
-    }
-  }
-
-  @keyframes floatSlow {
-    0% {
-      transform: translateY(0) rotate(0deg);
-    }
-    100% {
-      transform: translateY(-4px) rotate(4deg);
+      transform: translateY(-6px);
     }
   }
 
@@ -676,7 +597,7 @@
     }
 
     .announcement-title {
-      font-size: 1.2rem;
+      font-size: 1.18rem;
     }
 
     .feature-bullets {
