@@ -984,7 +984,7 @@
           <h3 class="arcade-title">GALAXY DEFENDER</h3>
           <p class="arcade-sub">Kapten {characterName}, siapkan meriam laser!</p>
           <div class="arcade-instructions">
-            <span>👉 <strong>Geser layar / D-Pad</strong> bebas (maju, mundur, belok)</span>
+            <span>👉 <strong>Geser / Drag layar</strong> bebas untuk kendalikan pesawat</span>
             <span>⚡ Laser otomatis menembak alien</span>
             <span>⌨️ Keyboard: <strong>W/A/S/D</strong> atau <strong>Panah ↑ ↓ ← →</strong></span>
           </div>
@@ -1034,93 +1034,16 @@
 
   <!-- Touch Navigation Controls Deck -->
   <footer class="space-footer-controller">
-    <div class="space-dpad-deck">
-      <!-- 4-Way Arcade D-Pad -->
-      <div class="dpad-cross" role="group" aria-label="Kontrol arah pesawat">
-        <!-- Up / Maju -->
-        <button
-          type="button"
-          class="dpad-btn dpad-btn-up"
-          class:is-active={keys.up}
-          onpointerdown={(e) => { e.preventDefault(); keys.up = true; }}
-          onpointerup={(e) => { e.preventDefault(); keys.up = false; }}
-          onpointerleave={(e) => { e.preventDefault(); keys.up = false; }}
-          onpointercancel={(e) => { e.preventDefault(); keys.up = false; }}
-          aria-label="Maju"
-          title="Maju [W / ↑]"
-        >
-          <span class="dpad-arrow">▲</span>
-        </button>
-
-        <div class="dpad-middle-row">
-          <!-- Left / Kiri -->
-          <button
-            type="button"
-            class="dpad-btn dpad-btn-left"
-            class:is-active={keys.left}
-            onpointerdown={(e) => { e.preventDefault(); keys.left = true; }}
-            onpointerup={(e) => { e.preventDefault(); keys.left = false; }}
-            onpointerleave={(e) => { e.preventDefault(); keys.left = false; }}
-            onpointercancel={(e) => { e.preventDefault(); keys.left = false; }}
-            aria-label="Kiri"
-            title="Kiri [A / ←]"
-          >
-            <span class="dpad-arrow">◀</span>
-          </button>
-
-          <!-- Center Emblem / Pivot -->
-          <div class="dpad-center-hub">
-            <span class="hub-core"></span>
-          </div>
-
-          <!-- Right / Kanan -->
-          <button
-            type="button"
-            class="dpad-btn dpad-btn-right"
-            class:is-active={keys.right}
-            onpointerdown={(e) => { e.preventDefault(); keys.right = true; }}
-            onpointerup={(e) => { e.preventDefault(); keys.right = false; }}
-            onpointerleave={(e) => { e.preventDefault(); keys.right = false; }}
-            onpointercancel={(e) => { e.preventDefault(); keys.right = false; }}
-            aria-label="Kanan"
-            title="Kanan [D / →]"
-          >
-            <span class="dpad-arrow">▶</span>
-          </button>
-        </div>
-
-        <!-- Down / Mundur -->
-        <button
-          type="button"
-          class="dpad-btn dpad-btn-down"
-          class:is-active={keys.down}
-          onpointerdown={(e) => { e.preventDefault(); keys.down = true; }}
-          onpointerup={(e) => { e.preventDefault(); keys.down = false; }}
-          onpointerleave={(e) => { e.preventDefault(); keys.down = false; }}
-          onpointercancel={(e) => { e.preventDefault(); keys.down = false; }}
-          aria-label="Mundur"
-          title="Mundur [S / ↓]"
-        >
-          <span class="dpad-arrow">▼</span>
-        </button>
-      </div>
-
-      <!-- Action Group: Auto Fire Toggle & Hint -->
-      <div class="controller-action-group">
-        <button
-          type="button"
-          class="ctrl-touch-btn fire-toggle-btn"
-          class:is-active={isAutoFiring}
-          onclick={() => isAutoFiring = !isAutoFiring}
-          aria-label="Toggle auto-fire"
-        >
-          <span class="fire-icon">⚡</span>
-          <span class="fire-label">{isAutoFiring ? 'AUTO FIRE ON' : 'MANUAL FIRE'}</span>
-        </button>
-
-        <span class="free-move-hint">💡 Bebas geser layar / D-Pad</span>
-      </div>
-    </div>
+    <button
+      type="button"
+      class="ctrl-touch-btn fire-toggle-btn"
+      class:is-active={isAutoFiring}
+      onclick={() => isAutoFiring = !isAutoFiring}
+      aria-label="Toggle auto-fire"
+    >
+      <span class="fire-icon">⚡</span>
+      <span class="fire-label">{isAutoFiring ? 'AUTO FIRE ON' : 'MANUAL FIRE'}</span>
+    </button>
   </footer>
 </div>
 
@@ -1680,121 +1603,38 @@
     background: #334155;
   }
 
-  /* ── Bottom Touch Controller Deck (4-Way Omni D-Pad) ── */
+  /* ── Bottom Controller Deck (Auto Fire Only) ── */
   .space-footer-controller {
     background: #0B1120;
     border-top: 2px solid #1E293B;
-    padding: 8px 14px 10px;
+    padding: 10px 18px 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 20;
   }
 
-  .space-dpad-deck {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 420px;
-    gap: 14px;
-  }
-
-  /* 4-Way Cross D-Pad */
-  .dpad-cross {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    user-select: none;
-    touch-action: none;
-  }
-
-  .dpad-middle-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-  }
-
-  .dpad-btn {
-    width: 36px;
-    height: 32px;
-    background: #1E293B;
-    border: 1.5px solid #334155;
-    border-radius: 8px;
-    color: #38BDF8;
-    font-size: 0.88rem;
-    font-weight: 900;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.08s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    touch-action: none;
-    user-select: none;
-  }
-
-  .dpad-btn:hover {
-    background: #334155;
-    border-color: #38BDF8;
-    color: #FFFFFF;
-  }
-
-  .dpad-btn:active,
-  .dpad-btn.is-active {
-    background: #0284C7;
-    border-color: #38BDF8;
-    color: #FFFFFF;
-    transform: scale(0.92);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
-  }
-
-  .dpad-center-hub {
-    width: 18px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .hub-core {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #334155;
-  }
-
-  /* Right Action Group */
-  .controller-action-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    min-width: 0;
-  }
-
   .ctrl-touch-btn {
-    height: 42px;
+    width: 100%;
+    max-width: 320px;
+    height: 44px;
     background: #1E293B;
     border: 1.5px solid #334155;
-    border-radius: 12px;
+    border-radius: 14px;
     color: #F8FAFC;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    transition: transform 0.08s, background 0.12s;
+    gap: 8px;
+    transition: transform 0.08s, background 0.12s, box-shadow 0.15s;
+    user-select: none;
   }
 
   .ctrl-touch-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 
   .fire-toggle-btn {
@@ -1807,23 +1647,14 @@
     background: linear-gradient(135deg, #0284C7, #0369A1);
     color: #FFFFFF;
     border-color: #38BDF8;
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
   }
 
   .fire-icon {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 
   .fire-label {
-    letter-spacing: 0.04em;
-  }
-
-  .free-move-hint {
-    font-size: 0.68rem;
-    color: #94A3B8;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    letter-spacing: 0.05em;
   }
 </style>
