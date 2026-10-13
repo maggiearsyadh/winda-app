@@ -15,11 +15,33 @@
   import QuizModal       from '$lib/components/QuizModal.svelte';
   import ApologyModal    from '$lib/components/ApologyModal.svelte';
   import FloatingMusic   from '$lib/components/FloatingMusic.svelte';
+  import NewGameAnnouncementModal from '$lib/components/NewGameAnnouncementModal.svelte';
 
   let currentRoute = $state(typeof window !== 'undefined' ? (window.location.hash || '#/') : '#/');
   let isMoodOpen = $state(false);
   let isQuizOpen = $state(false);
+  let quizInitialScreen = $state('select-character');
   let isApologyOpen = $state(false);
+  let isAnnouncementOpen = $state(false);
+
+  let hasCheckedAnnouncement = false;
+
+  function triggerAnnouncementCheck() {
+    if (hasCheckedAnnouncement || isAnnouncementOpen || isQuizOpen) return;
+    try {
+      const isHidden = localStorage.getItem('winda_hide_block_blast_popup_v1');
+      const isSeenThisSession = sessionStorage.getItem('winda_seen_block_blast_popup_v1');
+      if (!isHidden && !isSeenThisSession) {
+        hasCheckedAnnouncement = true;
+        setTimeout(() => {
+          const unlocked = localStorage.getItem('winda_app_locked_prank_v1');
+          if (unlocked === 'unlocked' && !isApologyOpen) {
+            isAnnouncementOpen = true;
+          }
+        }, 650);
+      }
+    } catch (e) {}
+  }
 
   $effect(() => {
     const handleHash = () => {
@@ -39,8 +61,24 @@
           isApologyOpen = true;
         }, 400);
         return () => clearTimeout(timer);
+      } else {
+        triggerAnnouncementCheck();
       }
-    } catch (e) {}
+    } catch (e) {
+      triggerAnnouncementCheck();
+    }
+  });
+
+  // When lock modal closes, check if we can show new game announcement
+  $effect(() => {
+    if (!isApologyOpen) {
+      try {
+        const unlocked = localStorage.getItem('winda_app_locked_prank_v1');
+        if (unlocked === 'unlocked') {
+          triggerAnnouncementCheck();
+        }
+      } catch (e) {}
+    }
   });
 
   function openMood() {
@@ -48,6 +86,23 @@
   }
 
   function openQuiz() {
+    quizInitialScreen = 'select-character';
+    isQuizOpen = true;
+  }
+
+  function handleCloseAnnouncement(dontShowAgain) {
+    isAnnouncementOpen = false;
+    try {
+      sessionStorage.setItem('winda_seen_block_blast_popup_v1', 'true');
+      if (dontShowAgain) {
+        localStorage.setItem('winda_hide_block_blast_popup_v1', 'true');
+      }
+    } catch (e) {}
+  }
+
+  function handlePlayNowFromAnnouncement(dontShowAgain) {
+    handleCloseAnnouncement(dontShowAgain);
+    quizInitialScreen = 'blast';
     isQuizOpen = true;
   }
 
@@ -93,8 +148,13 @@
 
 <!-- Interactive Modals -->
 <MoodModal bind:isOpen={isMoodOpen} />
-<QuizModal bind:isOpen={isQuizOpen} />
+<QuizModal bind:isOpen={isQuizOpen} initialScreen={quizInitialScreen} />
 <ApologyModal bind:isOpen={isApologyOpen} />
+<NewGameAnnouncementModal
+  bind:isOpen={isAnnouncementOpen}
+  onPlayNow={handlePlayNowFromAnnouncement}
+  onClose={handleCloseAnnouncement}
+/>
 
 <!-- Always-Accessible Floating Music Controller -->
 <FloatingMusic />

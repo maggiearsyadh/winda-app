@@ -5,7 +5,11 @@
   import SpaceShooterGame from './SpaceShooterGame.svelte';
   import BlockBlastGame from './BlockBlastGame.svelte';
 
-  let { isOpen = $bindable(false), onClose } = $props();
+  let {
+    isOpen = $bindable(false),
+    onClose,
+    initialScreen = 'select-character'
+  } = $props();
 
   // ── Configuration Data ──
   const BODIES = [
@@ -157,7 +161,7 @@
 
   $effect(() => {
     if (isOpen) {
-      currentScreen = 'select-character';
+      currentScreen = initialScreen || 'select-character';
     }
   });
 
