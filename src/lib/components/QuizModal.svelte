@@ -3,6 +3,7 @@
   import confetti from 'canvas-confetti';
   import ForestRunnerGame from './ForestRunnerGame.svelte';
   import SpaceShooterGame from './SpaceShooterGame.svelte';
+  import BlockBlastGame from './BlockBlastGame.svelte';
 
   let { isOpen = $bindable(false), onClose } = $props();
 
@@ -192,6 +193,11 @@
   function goToShooter() {
     playSuccessChime();
     currentScreen = 'shooter';
+  }
+
+  function goToBlockBlast() {
+    playSuccessChime();
+    currentScreen = 'blast';
   }
 
   function goBackToSelection() {
@@ -551,6 +557,30 @@
                 </button>
               </div>
             </div>
+
+            <!-- Game 3: Cosmic Block Blast Puzzle -->
+            <div class="arcade-game-card blast-card" onclick={goToBlockBlast} role="button" tabindex="0">
+              <div class="arcade-card-top">
+                <!-- <span class="card-genre-pill amber-pill">🧩 PUZZLE 8x8</span> -->
+                <!-- <span class="card-badge-new">BARU ✨</span> -->
+              </div>
+              <div class="card-visual-banner blast-visual">
+                <span class="card-hero-icon">🧩💥</span>
+                <div class="card-mini-scenery">🟧 &nbsp; 🟨 &nbsp; 🟩</div>
+              </div>
+              <div class="card-details">
+                <h3 class="card-game-title">Block Blast Puzzle</h3>
+                <p class="card-game-desc">Susun balok di papan 8x8, pecahkan baris & kolom bersama {characterName}!</p>
+                <div class="card-tag-row">
+                  <span class="card-feature-tag">Grid 8x8</span>
+                  <span class="card-feature-tag">Kombo Berantai 🔥</span>
+                  <span class="card-feature-tag">Santai & Asah Otak</span>
+                </div>
+                <button type="button" class="btn-launch-game amber-launch" onclick={goToBlockBlast}>
+                  <span>Mainkan Block Blast </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -570,6 +600,19 @@
       {:else if currentScreen === 'shooter'}
         <!-- ── SCREEN 5: GALAXY RETRO SHOOTER MINI-GAME ── -->
         <SpaceShooterGame
+          {currentBody}
+          {currentHat}
+          {currentOutfit}
+          {currentHatStyle}
+          {currentOutfitStyle}
+          {characterName}
+          onBack={() => currentScreen = 'games-hub'}
+          onSwitchGame={() => currentScreen = 'blast'}
+        />
+
+      {:else if currentScreen === 'blast'}
+        <!-- ── SCREEN 6: COSMIC BLOCK BLAST PUZZLE ── -->
+        <BlockBlastGame
           {currentBody}
           {currentHat}
           {currentOutfit}
@@ -1834,5 +1877,41 @@
     background: linear-gradient(135deg, #4F46E5, #4338CA);
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+  }
+
+  .blast-card:hover {
+    border-color: #c14dd8;
+  }
+
+  .blast-visual {
+    background: radial-gradient(circle at 60% 40%, #27272A 0%, #18181B 60%, #09090B 100%);
+    border-top: 1px solid #3F3F46;
+    border-bottom: 1px solid #3F3F46;
+  }
+
+  .amber-pill {
+    background: #e1c7fe;
+    color: #9d35e6;
+  }
+
+  .card-badge-new {
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: #a30bf5;
+    background: #e1c7fe;
+    border: 1px solid #b670f3;
+    padding: 2px 8px; 
+    border-radius: 999px;
+  }
+
+  .amber-launch {
+    background: linear-gradient(135deg, #8f5cfd, #9729f5);
+    color: #ffffff;
+  }
+
+  .amber-launch:hover {
+    background: linear-gradient(135deg, #8d29f5, #a82cf3);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(179, 11, 245, 0.4);
   }
 </style>
