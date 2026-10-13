@@ -31,7 +31,8 @@
   const SHIP_HEIGHT = 68;
   let playerX = $state(GAME_WIDTH / 2 - SHIP_WIDTH / 2);
   let playerY = $state(GAME_HEIGHT - 105);
-  let targetPlayerX = GAME_WIDTH / 2 - SHIP_WIDTH / 2;
+  let targetPlayerX = $state(GAME_WIDTH / 2 - SHIP_WIDTH / 2);
+  let targetPlayerY = $state(GAME_HEIGHT - 105);
   let shipTilt = $state(0);
   let isInvulnerable = $state(false);
   let invulnerableTimer = 0;
@@ -50,7 +51,7 @@
   let stars = $state([]);
 
   // ── Input & Loop State ──
-  let keys = { left: false, right: false, fire: false };
+  let keys = { left: false, right: false, up: false, down: false, fire: false };
   let animationFrameId = null;
   let lastTimestamp = 0;
   let lastFireTime = 0;
@@ -187,7 +188,7 @@
     }
   });
 
-  // ── Keyboard Controls ──
+  // ── Keyboard Controls (4-Way Omni-directional: WASD & Arrows) ──
   function handleKeyDown(e) {
     if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
       e.preventDefault();
@@ -195,6 +196,12 @@
     } else if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
       e.preventDefault();
       keys.right = true;
+    } else if (e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+      e.preventDefault();
+      keys.up = true;
+    } else if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      keys.down = true;
     } else if (e.code === 'Space') {
       e.preventDefault();
       keys.fire = true;
@@ -208,12 +215,20 @@
       keys.left = false;
     } else if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
       keys.right = false;
+    } else if (e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+      keys.up = false;
+    } else if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+      keys.down = false;
     } else if (e.code === 'Space') {
       keys.fire = false;
     }
   }
 
-  // ── Pointer & Touch Controls (Direct Drag & Buttons) ──
+  // ── Pointer & Touch Controls (Free 360° Drag & D-Pad) ──
+  let isPointerDragging = false;
+  let lastPointerClientX = 0;
+  let lastPointerClientY = 0;
+
   function handlePointerDown(e) {
     if (gameState === 'ready') {
       startGame();
@@ -223,29 +238,41 @@
       restartGame();
       return;
     }
-    updatePointerPosition(e);
+    isPointerDragging = true;
+    lastPointerClientX = e.clientX;
+    lastPointerClientY = e.clientY;
+    updatePointerDirect(e);
   }
 
   function handlePointerMove(e) {
-    if (gameState !== 'playing') return;
-    if (e.buttons > 0 || e.pointerType === 'touch') {
-      updatePointerPosition(e);
-    }
+    if (gameState !== 'playing' || !isPointerDragging) return;
+
+    const stage = e.currentTarget.closest('.space-stage-screen') || e.currentTarget;
+    const rect = stage.getBoundingClientRect();
+
+    // Proportional delta movement in both X (kiri/kanan) and Y (maju/mundur)
+    const deltaX = ((e.clientX - lastPointerClientX) / rect.width) * GAME_WIDTH;
+    const deltaY = ((e.clientY - lastPointerClientY) / rect.height) * GAME_HEIGHT;
+
+    targetPlayerX = Math.max(8, Math.min(GAME_WIDTH - SHIP_WIDTH - 8, targetPlayerX + deltaX * 1.15));
+    targetPlayerY = Math.max(45, Math.min(GAME_HEIGHT - SHIP_HEIGHT - 10, targetPlayerY + deltaY * 1.15));
+
+    lastPointerClientX = e.clientX;
+    lastPointerClientY = e.clientY;
   }
 
-  function updatePointerPosition(e) {
+  function handlePointerUp() {
+    isPointerDragging = false;
+  }
+
+  function updatePointerDirect(e) {
     const stage = e.currentTarget.closest('.space-stage-screen') || e.currentTarget;
     const rect = stage.getBoundingClientRect();
     const relX = ((e.clientX - rect.left) / rect.width) * GAME_WIDTH;
-    targetPlayerX = Math.max(10, Math.min(GAME_WIDTH - SHIP_WIDTH - 10, relX - SHIP_WIDTH / 2));
-  }
+    const relY = ((e.clientY - rect.top) / rect.height) * GAME_HEIGHT;
 
-  function moveLeft() {
-    targetPlayerX = Math.max(10, targetPlayerX - 45);
-  }
-
-  function moveRight() {
-    targetPlayerX = Math.min(GAME_WIDTH - SHIP_WIDTH - 10, targetPlayerX + 45);
+    targetPlayerX = Math.max(8, Math.min(GAME_WIDTH - SHIP_WIDTH - 8, relX - SHIP_WIDTH / 2));
+    targetPlayerY = Math.max(45, Math.min(GAME_HEIGHT - SHIP_HEIGHT - 10, relY - SHIP_HEIGHT / 2));
   }
 
   // ── Game Management ──
@@ -261,7 +288,9 @@
     weaponType = 'normal';
     weaponTimer = 0;
     playerX = GAME_WIDTH / 2 - SHIP_WIDTH / 2;
+    playerY = GAME_HEIGHT - 105;
     targetPlayerX = playerX;
+    targetPlayerY = playerY;
     bullets = [];
     enemyBullets = [];
     enemies = [];
@@ -328,20 +357,21 @@
   }
 
   function updatePlayer(dt, timestamp) {
-    // Keyboard steering
-    if (keys.left) {
-      targetPlayerX = Math.max(10, targetPlayerX - 6.5 * dt);
-    }
-    if (keys.right) {
-      targetPlayerX = Math.min(GAME_WIDTH - SHIP_WIDTH - 10, targetPlayerX + 6.5 * dt);
-    }
+    // 4-Way Keyboard & Controller steering (Maju, Mundur, Kiri, Kanan)
+    const moveSpeed = 6.8 * dt;
+    if (keys.left) targetPlayerX = Math.max(8, targetPlayerX - moveSpeed);
+    if (keys.right) targetPlayerX = Math.min(GAME_WIDTH - SHIP_WIDTH - 8, targetPlayerX + moveSpeed);
+    if (keys.up) targetPlayerY = Math.max(45, targetPlayerY - moveSpeed);
+    if (keys.down) targetPlayerY = Math.min(GAME_HEIGHT - SHIP_HEIGHT - 10, targetPlayerY + moveSpeed);
 
-    // Smooth lerp to target position
-    const diff = targetPlayerX - playerX;
-    playerX += diff * 0.25 * dt;
+    // Smooth lerp to target position in both X and Y
+    const diffX = targetPlayerX - playerX;
+    const diffY = targetPlayerY - playerY;
+    playerX += diffX * 0.32 * dt;
+    playerY += diffY * 0.32 * dt;
 
     // Banking tilt animation
-    shipTilt = Math.max(-14, Math.min(14, diff * 1.5));
+    shipTilt = Math.max(-16, Math.min(16, diffX * 1.5));
 
     // Invulnerability timer
     if (isInvulnerable) {
@@ -749,6 +779,8 @@
     tabindex="0"
     onpointerdown={handlePointerDown}
     onpointermove={handlePointerMove}
+    onpointerup={handlePointerUp}
+    onpointercancel={handlePointerUp}
     aria-label="Area luar angkasa, geser pesawat untuk bergerak"
   >
     <!-- Deep Space Starfield -->
@@ -883,7 +915,10 @@
       {/if}
 
       <!-- Animated Thruster Flame -->
-      <div class="ship-thruster-flame">
+      <div
+        class="ship-thruster-flame"
+        class:is-boosting={keys.up || (targetPlayerY < playerY - 3)}
+      >
         <div class="flame-core"></div>
       </div>
 
@@ -949,8 +984,9 @@
           <h3 class="arcade-title">GALAXY DEFENDER</h3>
           <p class="arcade-sub">Kapten {characterName}, siapkan meriam laser!</p>
           <div class="arcade-instructions">
-            <span>👉 <strong>Geser / Drag layar</strong> untuk gerak</span>
+            <span>👉 <strong>Geser layar / D-Pad</strong> bebas (maju, mundur, belok)</span>
             <span>⚡ Laser otomatis menembak alien</span>
+            <span>⌨️ Keyboard: <strong>W/A/S/D</strong> atau <strong>Panah ↑ ↓ ← →</strong></span>
           </div>
           <button type="button" class="btn-space-play" onclick={startGame}>
             <span>START MISSION 🚀</span>
@@ -998,33 +1034,93 @@
 
   <!-- Touch Navigation Controls Deck -->
   <footer class="space-footer-controller">
-    <button
-      type="button"
-      class="ctrl-touch-btn"
-      onpointerdown={moveLeft}
-      aria-label="Gerak ke kiri"
-    >
-      <span>◀ KIRI</span>
-    </button>
+    <div class="space-dpad-deck">
+      <!-- 4-Way Arcade D-Pad -->
+      <div class="dpad-cross" role="group" aria-label="Kontrol arah pesawat">
+        <!-- Up / Maju -->
+        <button
+          type="button"
+          class="dpad-btn dpad-btn-up"
+          class:is-active={keys.up}
+          onpointerdown={(e) => { e.preventDefault(); keys.up = true; }}
+          onpointerup={(e) => { e.preventDefault(); keys.up = false; }}
+          onpointerleave={(e) => { e.preventDefault(); keys.up = false; }}
+          onpointercancel={(e) => { e.preventDefault(); keys.up = false; }}
+          aria-label="Maju"
+          title="Maju [W / ↑]"
+        >
+          <span class="dpad-arrow">▲</span>
+        </button>
 
-    <button
-      type="button"
-      class="ctrl-touch-btn fire-toggle-btn"
-      class:is-active={isAutoFiring}
-      onclick={() => isAutoFiring = !isAutoFiring}
-      aria-label="Toggle auto-fire"
-    >
-      <span>{isAutoFiring ? '⚡ AUTO FIRE ON' : '🎯 MANUAL FIRE'}</span>
-    </button>
+        <div class="dpad-middle-row">
+          <!-- Left / Kiri -->
+          <button
+            type="button"
+            class="dpad-btn dpad-btn-left"
+            class:is-active={keys.left}
+            onpointerdown={(e) => { e.preventDefault(); keys.left = true; }}
+            onpointerup={(e) => { e.preventDefault(); keys.left = false; }}
+            onpointerleave={(e) => { e.preventDefault(); keys.left = false; }}
+            onpointercancel={(e) => { e.preventDefault(); keys.left = false; }}
+            aria-label="Kiri"
+            title="Kiri [A / ←]"
+          >
+            <span class="dpad-arrow">◀</span>
+          </button>
 
-    <button
-      type="button"
-      class="ctrl-touch-btn"
-      onpointerdown={moveRight}
-      aria-label="Gerak ke kanan"
-    >
-      <span>KANAN ▶</span>
-    </button>
+          <!-- Center Emblem / Pivot -->
+          <div class="dpad-center-hub">
+            <span class="hub-core"></span>
+          </div>
+
+          <!-- Right / Kanan -->
+          <button
+            type="button"
+            class="dpad-btn dpad-btn-right"
+            class:is-active={keys.right}
+            onpointerdown={(e) => { e.preventDefault(); keys.right = true; }}
+            onpointerup={(e) => { e.preventDefault(); keys.right = false; }}
+            onpointerleave={(e) => { e.preventDefault(); keys.right = false; }}
+            onpointercancel={(e) => { e.preventDefault(); keys.right = false; }}
+            aria-label="Kanan"
+            title="Kanan [D / →]"
+          >
+            <span class="dpad-arrow">▶</span>
+          </button>
+        </div>
+
+        <!-- Down / Mundur -->
+        <button
+          type="button"
+          class="dpad-btn dpad-btn-down"
+          class:is-active={keys.down}
+          onpointerdown={(e) => { e.preventDefault(); keys.down = true; }}
+          onpointerup={(e) => { e.preventDefault(); keys.down = false; }}
+          onpointerleave={(e) => { e.preventDefault(); keys.down = false; }}
+          onpointercancel={(e) => { e.preventDefault(); keys.down = false; }}
+          aria-label="Mundur"
+          title="Mundur [S / ↓]"
+        >
+          <span class="dpad-arrow">▼</span>
+        </button>
+      </div>
+
+      <!-- Action Group: Auto Fire Toggle & Hint -->
+      <div class="controller-action-group">
+        <button
+          type="button"
+          class="ctrl-touch-btn fire-toggle-btn"
+          class:is-active={isAutoFiring}
+          onclick={() => isAutoFiring = !isAutoFiring}
+          aria-label="Toggle auto-fire"
+        >
+          <span class="fire-icon">⚡</span>
+          <span class="fire-label">{isAutoFiring ? 'AUTO FIRE ON' : 'MANUAL FIRE'}</span>
+        </button>
+
+        <span class="free-move-hint">💡 Bebas geser layar / D-Pad</span>
+      </div>
+    </div>
   </footer>
 </div>
 
@@ -1313,6 +1409,14 @@
     filter: drop-shadow(0 0 8px #F97316);
     animation: flamePulse 0.12s ease-in-out infinite alternate;
     z-index: 1;
+    transition: height 0.15s ease, width 0.15s ease;
+  }
+
+  .ship-thruster-flame.is-boosting {
+    height: 28px;
+    width: 18px;
+    background: linear-gradient(to bottom, #FBBF24, #EF4444, #8B5CF6, transparent);
+    filter: drop-shadow(0 0 16px #F59E0B);
   }
 
   .flame-core {
@@ -1576,47 +1680,150 @@
     background: #334155;
   }
 
-  /* ── Bottom Touch Controller Deck ── */
+  /* ── Bottom Touch Controller Deck (4-Way Omni D-Pad) ── */
   .space-footer-controller {
-    background: #0F172A;
+    background: #0B1120;
     border-top: 2px solid #1E293B;
-    padding: 8px 12px;
+    padding: 8px 14px 10px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
     z-index: 20;
   }
 
-  .ctrl-touch-btn {
-    flex: 1;
-    height: 44px;
+  .space-dpad-deck {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 420px;
+    gap: 14px;
+  }
+
+  /* 4-Way Cross D-Pad */
+  .dpad-cross {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .dpad-middle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .dpad-btn {
+    width: 36px;
+    height: 32px;
     background: #1E293B;
     border: 1.5px solid #334155;
-    border-radius: 14px;
+    border-radius: 8px;
+    color: #38BDF8;
+    font-size: 0.88rem;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.08s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    touch-action: none;
+    user-select: none;
+  }
+
+  .dpad-btn:hover {
+    background: #334155;
+    border-color: #38BDF8;
+    color: #FFFFFF;
+  }
+
+  .dpad-btn:active,
+  .dpad-btn.is-active {
+    background: #0284C7;
+    border-color: #38BDF8;
+    color: #FFFFFF;
+    transform: scale(0.92);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  }
+
+  .dpad-center-hub {
+    width: 18px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hub-core {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #334155;
+  }
+
+  /* Right Action Group */
+  .controller-action-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .ctrl-touch-btn {
+    height: 42px;
+    background: #1E293B;
+    border: 1.5px solid #334155;
+    border-radius: 12px;
     color: #F8FAFC;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     transition: transform 0.08s, background 0.12s;
   }
 
   .ctrl-touch-btn:active {
     transform: scale(0.96);
-    background: #334155;
   }
 
   .fire-toggle-btn {
-    flex: 1.3;
     border-color: #0284C7;
     color: #38BDF8;
+    background: rgba(2, 132, 199, 0.15);
   }
 
   .fire-toggle-btn.is-active {
-    background: #0369A1;
+    background: linear-gradient(135deg, #0284C7, #0369A1);
     color: #FFFFFF;
     border-color: #38BDF8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  }
+
+  .fire-icon {
+    font-size: 1rem;
+  }
+
+  .fire-label {
+    letter-spacing: 0.04em;
+  }
+
+  .free-move-hint {
+    font-size: 0.68rem;
+    color: #94A3B8;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
