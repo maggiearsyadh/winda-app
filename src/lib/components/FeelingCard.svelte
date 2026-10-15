@@ -1,5 +1,5 @@
 <script>
-  let {onConsultationClick } = $props();
+  let { onConsultationClick, onShredderClick } = $props();
 </script>
 
 <section class="feeling-section" aria-label="Bagian How's your feeling">
@@ -21,8 +21,18 @@
     </h1>
 
     <div class="action-buttons">
-      <!-- Complaint button -->
-      
+      <!-- Exam Shredder button -->
+      <button
+        type="button"
+        class="shredder-action-btn"
+        onclick={onShredderClick}
+        aria-label="Exam Rage Shredder"
+      >
+        <span> Shred Ujian</span>
+        <svg class="flame-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </button>
 
       <!-- Consultation button (opens Mood Frogs!) -->
       <button
@@ -121,6 +131,41 @@
 
   .black-action-btn:active {
     transform: translateY(1px);
+  }
+
+  .shredder-action-btn {
+    flex: 1;
+    max-width: 175px;
+    height: 48px;
+    background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 800;
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border: none;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+
+  .shredder-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+  }
+
+  .shredder-action-btn:active {
+    transform: translateY(1px);
+  }
+
+  .flame-btn-icon {
+    flex-shrink: 0;
+    margin-left: 6px;
   }
 
   .plus-icon {

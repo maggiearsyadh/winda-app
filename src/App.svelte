@@ -16,6 +16,7 @@
   import ApologyModal    from '$lib/components/ApologyModal.svelte';
   import FloatingMusic   from '$lib/components/FloatingMusic.svelte';
   import NewGameAnnouncementModal from '$lib/components/NewGameAnnouncementModal.svelte';
+  import ExamRageShredderModal from '$lib/components/ExamRageShredderModal.svelte';
 
   let currentRoute = $state(typeof window !== 'undefined' ? (window.location.hash || '#/') : '#/');
   let isMoodOpen = $state(false);
@@ -23,6 +24,7 @@
   let quizInitialScreen = $state('select-character');
   let isApologyOpen = $state(false);
   let isAnnouncementOpen = $state(false);
+  let isShredderOpen = $state(false);
 
   let hasCheckedAnnouncement = false;
 
@@ -85,6 +87,10 @@
     isMoodOpen = true;
   }
 
+  function openShredder() {
+    isShredderOpen = true;
+  }
+
   function openQuiz() {
     quizInitialScreen = 'select-character';
     isQuizOpen = true;
@@ -130,6 +136,7 @@
       <!-- 1. Character & HOW'S YOUR FEELING Card -->
       <FeelingCard
         onConsultationClick={openMood}
+        onShredderClick={openShredder}
       />
 
       <!-- 2. Middle Row: BE AWARE ! (Lottie) + QUIZ ABOUT ED -->
@@ -155,6 +162,7 @@
   onPlayNow={handlePlayNowFromAnnouncement}
   onClose={handleCloseAnnouncement}
 />
+<ExamRageShredderModal bind:isOpen={isShredderOpen} />
 
 <!-- Always-Accessible Floating Music Controller -->
 <FloatingMusic />
