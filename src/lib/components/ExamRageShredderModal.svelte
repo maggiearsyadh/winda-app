@@ -13,10 +13,9 @@
 
   // Preset venting chips
   const PRESET_CHIPS = [
-    'Waktu ujian kurang banget',
-    'Dosen Bingung',
-    'Otak udah lelah',
-    'Penjelasan Kurang'
+    'Soal susah dan banyak',
+    'Waktu ujian kurang',
+    'Otak udah lelah'
   ];
 
   // Mascot comforting quotes
@@ -314,7 +313,7 @@
           <!-- ── PHASE 1: VIRTUAL EXAM SHEET INPUT ── -->
           <div class="input-screen">
             <h2 id="rage-modal-title" class="rage-title">Tulis & BUANG Beban Ujian</h2>
-            <p class="rage-subtitle">Ketik semua keluh kesah, nama matkul, atau soal ujian yang bikin pusing di bawah ini:</p>
+            <!-- <p class="rage-subtitle">Ketik semua keluh kesah, nama matkul, atau soal ujian yang bikin pusing di bawah ini:</p> -->
 
             <!-- Realistic Virtual Exam Paper -->
             <div class="exam-paper-container">
@@ -695,14 +694,14 @@
   }
 
   .exam-meta-label {
-    font-size: 0.62rem;
+    font-size: 0.55rem;
     font-weight: 800;
     color: #94A3B8;
     letter-spacing: 0.05em;
   }
 
   .exam-meta-val {
-    font-size: 0.82rem;
+    font-size: 0.55rem;
     font-weight: 800;
     color: #1E293B;
   }
@@ -711,7 +710,7 @@
     border: 2px solid #DC2626;
     color: #DC2626;
     font-weight: 900;
-    font-size: 0.72rem;
+    font-size: 0.60rem;
     padding: 3px 8px;
     border-radius: 6px;
     transform: rotate(-10deg);
