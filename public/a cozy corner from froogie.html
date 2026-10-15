@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>a little fox is proud of u 🦊 (from froogie 🐸)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fox: {
+                            orange: '#e07a5f',
+                            darkorange: '#c85a32',
+                            cream: '#f4f1de',
+                            amber: '#f2cc8f',
+                            brown: '#3d405b',
+                            darkbrown: '#2b2d42',
+                            moss: '#81b29a',
+                            frog: '#6b9080',
+                            softred: '#e05a47',
+                            parchment: '#fefae0',
+                            cardbg: 'rgba(254, 250, 224, 0.85)'
+                        }
+                    },
+                    fontFamily: {
+                        handwriting: ['Caveat', 'cursive'],
+                        sans: ['Nunito', 'sans-serif'],
+                        cute: ['Fredoka', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'cozy': '0 10px 25px -5px rgba(61, 64, 91, 0.15), 0 8px 10px -6px rgba(61, 64, 91, 0.1)',
+                        'glow': '0 0 20px rgba(242, 204, 143, 0.6)',
+                        'glow-orange': '0 0 25px rgba(224, 122, 95, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(180deg, #1d1e2c 0%, #2b2d42 40%, #3d2c2e 80%, #2c1b18 100%);
+            color: #f4f1de;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1d1e2c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e07a5f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f2cc8f;
+        }
+
+        /* Canvas Overlay */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Cute Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 8px rgba(242, 204, 143, 0.8)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(242, 204, 143, 1)); }
+        }
+
+        @keyframes tail-wag {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(8deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            40% { transform: scale(1.45); }
+            60% { transform: scale(1.45); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes floatUpFade {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        .tail-wag {
+            transform-origin: bottom left;
+            animation: tail-wag 2.5s ease-in-out infinite;
+        }
+
+        .pop-in {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .floating-heart {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUpFade 1.8s ease-out forwards;
+            font-size: 1.5rem;
+            z-index: 50;
+        }
+
+        /* Glassmorphism card */
+        .cozy-card {
+            background: rgba(43, 45, 66, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(242, 204, 143, 0.2);
+            border-radius: 1.5rem;
+        }
+
+        .parchment-card {
+            background: #fefae0;
+            color: #3d405b;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: 2px solid #f2cc8f;
+        }
+
+        /* Custom interactive button bounce */
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-3px) scale(1.03);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        /* Breathing Circle */
+        .breathing-orb {
+            animation: breathe 12s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen pb-16">
+
+    <!-- Particle Overlay Canvas for Fireflies, Leaves, Embers -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Top Navigation Bar / Sound Controls -->
+    <header class="relative z-20 max-w-5xl mx-auto px-4 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center space-x-2">
+            <a href="/" title="Kembali ke Beranda" class="flex items-center gap-1.5 text-xs font-cute bg-white/10 hover:bg-white/20 text-fox-cream px-3 py-1.5 rounded-full border border-fox-cream/20 transition-all hover:scale-105 mr-1">
+                <i class="fas fa-arrow-left"></i>
+                <span>Home</span>
+            </a>
+            <span class="text-2xl animate-bounce">🐸</span>
+            <span class="text-xl">🦊</span>
+            <div>
+                <span class="font-cute font-semibold text-lg text-fox-amber tracking-wide block leading-tight">a little fox is proud of u</span>
+                <span class="text-xs text-fox-cream/70 font-sans">crafted with love by froogie 🐸✨ for u</span>
+            </div>
+        </div>
+
+        <!-- Ambient Sound Controls -->
+        <div class="flex items-center space-x-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-fox-amber/30">
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="flex items-center space-x-2 text-sm text-fox-cream hover:text-fox-amber transition">
+                <i id="soundIcon" class="fas fa-volume-mute text-fox-amber"></i>
+                <span id="soundText" class="font-cute">Cozy Sounds: OFF</span>
+            </button>
+            <div class="h-4 w-[1px] bg-fox-cream/20"></div>
+            <button onclick="playChimeSound()" title="Ring soft chime" class="text-xs text-fox-amber hover:text-white transition">
+                <i class="fas fa-bell"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="relative z-10 max-w-4xl mx-auto px-4 mt-6 space-y-12">
+
+        <!-- HERO SECTION: Sleeping / Animated Fox Greeting -->
+        <section class="text-center relative pt-4 pb-8 flex flex-col items-center justify-center">
+            
+            <!-- Floating Stars / Lanterns Backdrops -->
+            <div class="absolute -top-4 left-10 text-fox-amber text-xl opacity-70 animate-pulse-glow"><i class="fas fa-star"></i></div>
+            <div class="absolute top-12 right-12 text-fox-amber text-2xl opacity-80 animate-pulse-glow" style="animation-delay: 1s;"><i class="fas fa-sparkles"></i></div>
+
+            <!-- SVG Animated Fox Hero Character -->
+            <div id="foxContainer" onclick="wakeUpFox()" class="relative cursor-pointer group my-4 transform transition-transform hover:scale-105 select-none" title="Click to talk to froogie's little messenger!">
+                
+                <!-- Status Thought Bubble -->
+                <div id="foxThoughtBubble" class="absolute -top-12 left-1/2 -translate-x-1/2 bg-fox-parchment text-fox-brown px-4 py-2 rounded-2xl shadow-lg font-cute text-sm font-semibold opacity-0 transition-all duration-300 pointer-events-none whitespace-nowrap border-2 border-fox-amber flex items-center gap-2">
+                    <span id="thoughtText">froogie sent me to check on u! Zzz... 😴</span>
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-fox-amber"></div>
+                </div>
+
+                <!-- SVG Cute Fox Illustration -->
+                <svg id="foxSVG" class="w-64 h-64 sm:w-72 sm:h-72 drop-shadow-[0_10px_20px_rgba(224,122,95,0.3)] transition-all duration-300" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Glow Behind Fox -->
+                    <circle cx="100" cy="120" r="65" fill="#e07a5f" opacity="0.15" class="animate-pulse" />
+                    
+                    <!-- Cozy Stump / Cushion -->
+                    <ellipse cx="100" cy="165" rx="70" ry="18" fill="#4a2e2b" />
+                    <ellipse cx="100" cy="163" rx="66" ry="15" fill="#6d433e" />
+                    <ellipse cx="100" cy="161" rx="58" ry="11" fill="#8c5851" />
+
+                    <!-- Little Frog Leaf Badge on Cushion (froogie signature) -->
+                    <path d="M 42 160 C 42 155, 52 150, 56 158 C 60 166, 46 168, 42 160 Z" fill="#81b29a" />
+
+                    <!-- Fox Tail -->
+                    <g id="foxTail" class="tail-wag">
+                        <path d="M 125 145 C 165 145, 175 105, 155 85 C 145 75, 130 90, 135 110 C 138 120, 130 135, 125 145 Z" fill="#e07a5f" />
+                        <path d="M 155 85 C 165 95, 155 115, 142 105 C 140 95, 148 85, 155 85 Z" fill="#f4f1de" />
+                    </g>
+
+                    <!-- Fox Body -->
+                    <path d="M 70 120 C 70 95, 130 95, 130 120 C 130 145, 120 160, 100 160 C 80 160, 70 145, 70 120 Z" fill="#e07a5f" />
+                    <!-- Fox Chest/Belly -->
+                    <path d="M 85 115 C 85 100, 115 100, 115 115 C 115 135, 108 155, 100 155 C 92 155, 85 135, 85 115 Z" fill="#f4f1de" />
+
+                    <!-- Paws -->
+                    <ellipse cx="85" cy="155" rx="8" ry="6" fill="#3d405b" />
+                    <ellipse cx="115" cy="155" rx="8" ry="6" fill="#3d405b" />
+
+                    <!-- Fox Head -->
+                    <g id="foxHead" class="transition-transform duration-300">
+                        <!-- Left Ear -->
+                        <path d="M 72 85 L 55 45 C 55 45, 75 52, 85 70 Z" fill="#e07a5f" />
+                        <path d="M 70 80 L 60 52 C 60 52, 73 57, 80 70 Z" fill="#3d405b" />
+                        <!-- Right Ear -->
+                        <path d="M 128 85 L 145 45 C 145 45, 125 52, 115 70 Z" fill="#e07a5f" />
+                        <path d="M 130 80 L 140 52 C 140 52, 127 57, 120 70 Z" fill="#3d405b" />
+
+                        <!-- Head Base -->
+                        <path d="M 65 85 C 65 65, 135 65, 135 85 C 135 110, 100 125, 100 125 C 100 125, 65 110, 65 85 Z" fill="#e07a5f" />
+                        <!-- Cheeks (White Accent) -->
+                        <path d="M 65 88 C 65 108, 85 120, 100 125 C 85 110, 72 95, 65 88 Z" fill="#f4f1de" />
+                        <path d="M 135 88 C 135 108, 115 120, 100 125 C 115 110, 128 95, 135 88 Z" fill="#f4f1de" />
+
+                        <!-- Cute Snout/Nose -->
+                        <polygon points="95,110 105,110 100,116" fill="#2b2d42" />
+
+                        <!-- Blush Circles -->
+                        <circle cx="78" cy="98" r="6" fill="#e05a47" opacity="0.4" />
+                        <circle cx="122" cy="98" r="6" fill="#e05a47" opacity="0.4" />
+
+                        <!-- Sleeping Eyes (Default) -->
+                        <g id="sleepingEyes" class="transition-opacity duration-300">
+                            <path d="M 76 90 Q 82 96 88 90" stroke="#3d405b" stroke-width="3" stroke-linecap="round" fill="none" />
+                            <path d="M 112 90 Q 118 96 124 90" stroke="#3d405b" stroke-width="3" stroke-linecap="round" fill="none" />
+                        </g>
+
+                        <!-- Awake/Happy Eyes (Hidden by default) -->
+                        <g id="awakeEyes" opacity="0" class="transition-opacity duration-300">
+                            <circle cx="82" cy="88" r="4" fill="#2b2d42" />
+                            <circle cx="118" cy="88" r="4" fill="#2b2d42" />
+                            <circle cx="84" cy="86" r="1.5" fill="#ffffff" />
+                            <circle cx="120" cy="86" r="1.5" fill="#ffffff" />
+                        </g>
+                        
+                        <!-- Extra Cute Eye (Happy Arcs) -->
+                        <g id="happyEyes" opacity="0" class="transition-opacity duration-300">
+                            <path d="M 76 92 Q 82 84 88 92" stroke="#2b2d42" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                            <path d="M 112 92 Q 118 84 124 92" stroke="#2b2d42" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                        </g>
+                    </g>
+                </svg>
+
+                <div class="mt-1 flex items-center justify-center space-x-1 text-xs text-fox-amber font-cute opacity-90">
+                    <i class="fas fa-hand-pointer animate-pulse"></i>
+                    <span>tap me! I have messages from froogie 🐸</span>
+                </div>
+            </div>
+
+            <!-- Main Greeting Header -->
+            <div class="space-y-3 max-w-xl">
+                <h1 id="mainGreeting" class="text-3xl sm:text-5xl font-cute font-bold text-fox-amber tracking-wide leading-tight drop-shadow-md">
+                    hey u, froogie & I are so proud of u! 🦊🐸✨
+                </h1>
+                <p class="text-fox-cream/90 text-base sm:text-lg font-sans">
+                    Welcome to this quiet cozy forest space. Froogie sent me here to take care of u and remind u to rest tonight.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SWEET HANDWRITTEN LETTER -->
+        <section class="parchment-card p-6 sm:p-10 rounded-3xl relative overflow-hidden transform transition hover:scale-[1.01]">
+            <div class="absolute top-4 right-4 text-3xl opacity-20 text-fox-darkorange"><i class="fas fa-stamp"></i></div>
+            <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-fox-amber/20 rounded-full blur-xl pointer-events-none"></div>
+
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="text-2xl">📜</span>
+                <h2 class="text-xl sm:text-2xl font-cute font-bold text-fox-darkorange">A Little Note for U ♡</h2>
+            </div>
+
+            <div class="font-handwriting text-2xl sm:text-3xl leading-relaxed text-fox-brown space-y-4">
+                <p>Hey, you,</p>
+                <p>
+                    I saw how hard you tried today, even when things got exhausting. I know it wasn’t always easy, but hey, you made it through the day, and I’m proud of you for that.
+                </p>
+                <p>
+                    Just a little reminder: you don’t have to get everything done or have it all figured out to be enough. You did what you could today, and that’s more than okay. Give yourself some credit, yeah? You deserve a little rest, too. ♡
+                </p>
+                <p class="text-right pt-2 font-bold text-fox-darkorange">
+                    – With lots of love & warm hugs,<br>
+                    <span class="text-3xl">froogie 🐸✨</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: INTERACTIVE FOX PLAY AREA & COMFORT JAR (2-COLUMN GRID) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- INTERACTIVE PAT & HUG THE FOX -->
+            <div class="cozy-card p-6 flex flex-col justify-between relative overflow-hidden">
+                <div>
+                    <div class="flex items-center space-x-2 mb-3">
+                        <span class="text-xl">🌸</span>
+                        <h3 class="font-cute text-xl text-fox-amber font-semibold">Pet Fox & Get Hugs from Froogie</h3>
+                    </div>
+                    <p class="text-sm text-fox-cream/80 mb-6">
+                        Whenever you need a reminder of how much froogie cares, tap below to get warm messages!
+                    </p>
+                </div>
+
+                <div class="bg-black/20 rounded-2xl p-4 text-center mb-6 min-h-[90px] flex items-center justify-center border border-fox-amber/10">
+                    <p id="foxInteractionText" class="font-cute text-lg text-fox-cream animate-fade-in">
+                        "froogie told me to give u the biggest hug! 🫂🐸"
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="interactFox('hug')" class="btn-bounce bg-fox-orange hover:bg-fox-darkorange text-white py-3 px-4 rounded-xl font-cute font-semibold flex items-center justify-center space-x-2 shadow-cozy">
+                        <i class="fas fa-heart text-xs"></i>
+                        <span>froogie's Hug</span>
+                    </button>
+                    <button onclick="interactFox('flower')" class="btn-bounce bg-fox-moss hover:bg-emerald-600 text-white py-3 px-4 rounded-xl font-cute font-semibold flex items-center justify-center space-x-2 shadow-cozy">
+                        <i class="fas fa-seedling text-xs"></i>
+                        <span>froogie's Flowers</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- COMFORT JAR: JAR OF WARM WORDS -->
+            <div class="cozy-card p-6 flex flex-col justify-between relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">🫙</span>
+                        <h3 class="font-cute text-xl text-fox-amber font-semibold">froogie's Jar of Warm Words</h3>
+                    </div>
+                    <span id="noteCounter" class="bg-fox-amber/20 text-fox-amber font-cute text-xs px-2.5 py-1 rounded-full border border-fox-amber/30">
+                        0 read
+                    </span>
+                </div>
+                
+                <p class="text-sm text-fox-cream/80 mb-4">
+                    froogie packed this jar full of sweet notes for u to read whenever u need a smile.
+                </p>
+
+                <!-- Glowing Jar Visual Component -->
+                <div onclick="drawJarNote()" class="relative my-2 py-4 bg-black/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer group hover:border-fox-amber/40 border border-transparent transition">
+                    <div class="relative w-20 h-24 border-4 border-fox-amber/60 rounded-b-3xl rounded-t-lg flex items-center justify-center bg-fox-amber/10 shadow-glow group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute top-0 w-16 h-3 bg-fox-amber/80 rounded-sm -mt-2"></div>
+                        <!-- Floating Glowing Notes inside Jar -->
+                        <div class="flex space-x-1 animate-pulse">
+                            <span class="text-xs">🐸</span>
+                            <span class="text-sm">📜</span>
+                            <span class="text-xs">✨</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-cute text-fox-amber mt-2 group-hover:underline">Tap jar to pull a note from froogie</span>
+                </div>
+
+                <!-- Display Note -->
+                <div id="jarNoteOutput" class="hidden pop-in bg-fox-parchment text-fox-brown p-3.5 rounded-xl font-cute text-center text-sm font-semibold border-2 border-fox-amber shadow-md mt-2">
+                    "froogie says: You did enough today."
+                </div>
+
+                <button onclick="drawJarNote()" class="btn-bounce mt-4 w-full bg-fox-amber hover:bg-yellow-500 text-fox-darkbrown py-3 px-4 rounded-xl font-cute font-bold flex items-center justify-center space-x-2 shadow-cozy">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Pull a Note from Froogie</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- SECTION 4: VIRTUAL GIFT BOX (UNWRAP A SECRET) -->
+        <section class="cozy-card p-6 sm:p-8 text-center relative overflow-hidden">
+            <div class="max-w-md mx-auto space-y-4">
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="text-2xl">🎁</span>
+                    <h3 class="font-cute text-2xl text-fox-amber font-semibold">A Surprise Gift From Froogie</h3>
+                </div>
+                <p class="text-sm text-fox-cream/80">
+                    Froogie wrapped a special present for u because u worked so hard today!
+                </p>
+
+                <!-- Present Box Container -->
+                <div id="giftBoxContainer" onclick="unwrapGift()" class="relative my-6 inline-block cursor-pointer group select-none">
+                    <!-- Wrapped Gift Box SVG/HTML -->
+                    <div id="giftBox" class="w-32 h-32 mx-auto bg-gradient-to-br from-fox-orange to-fox-darkorange rounded-2xl relative shadow-glow-orange flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                        <!-- Ribbon Vertical -->
+                        <div class="absolute inset-y-0 w-6 bg-fox-amber shadow-sm"></div>
+                        <!-- Ribbon Horizontal -->
+                        <div class="absolute inset-x-0 h-6 bg-fox-amber shadow-sm"></div>
+                        <!-- Bow Top -->
+                        <div class="absolute -top-4 text-4xl text-fox-amber drop-shadow">🎀</div>
+                        <span class="relative z-10 font-cute text-xs text-white bg-black/40 px-2 py-1 rounded-full font-bold">Unwrap froogie's Gift!</span>
+                    </div>
+                </div>
+
+                <!-- Revealed Gift Content (Hidden initially) -->
+                <div id="giftReward" class="hidden pop-in bg-fox-parchment text-fox-brown p-6 rounded-2xl border-2 border-fox-amber text-center space-y-3 shadow-2xl">
+                    <div id="giftBadgeIcon" class="text-5xl">🐸</div>
+                    <h4 id="giftTitle" class="font-cute text-2xl font-bold text-fox-darkorange">froogie's Official Hard-Worker Award!</h4>
+                    <p id="giftDesc" class="font-sans text-sm text-fox-brown/90 leading-relaxed">
+                        Awarded with endless love by froogie for trying your absolute best today!
+                    </p>
+                    <button onclick="resetGift()" class="text-xs font-cute text-fox-orange hover:underline pt-2 inline-block">
+                        <i class="fas fa-redo-alt mr-1"></i> Wrap gift again
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: COZY CAMPFIRE & RELAXATION CORNER -->
+        <section class="cozy-card p-6 sm:p-10 relative overflow-hidden space-y-10">
+            
+            <!-- Campfire Header & Breathing Guide -->
+            <div class="text-center space-y-4 max-w-lg mx-auto">
+                <div class="inline-flex items-center space-x-2 bg-fox-orange/20 px-4 py-1.5 rounded-full border border-fox-orange/40 text-fox-amber font-cute text-sm">
+                    <i class="fas fa-fire text-fox-orange animate-pulse"></i>
+                    <span>Cozy Campfire & Rest Zone</span>
+                </div>
+                <h3 class="font-cute text-3xl text-fox-cream font-bold">Unwind & Breathe Beside the Fire</h3>
+                <p class="text-sm text-fox-cream/80">
+                    Follow the glowing orb to slow down your heart rate. Froogie wants u to rest deeply tonight.
+                </p>
+
+                <!-- Guided Breathing Circle -->
+                <div class="py-8 flex flex-col items-center justify-center">
+                    <div class="relative w-36 h-36 flex items-center justify-center">
+                        <div class="breathing-orb absolute inset-0 bg-gradient-to-r from-fox-orange/40 to-fox-amber/40 rounded-full border-2 border-fox-amber/60 shadow-glow"></div>
+                        <span class="relative z-10 font-cute font-bold text-fox-cream text-lg text-center px-2">
+                            Breathe<br><span class="text-xs font-normal text-fox-amber">In & Out</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-fox-amber/20">
+
+            <!-- CAMPFIRE WISH LOGBOOK: Burn away a thought -->
+            <div class="max-w-xl mx-auto space-y-4">
+                <div class="text-center">
+                    <h4 class="font-cute text-xl text-fox-amber font-semibold">Campfire Release Logbook 🔥</h4>
+                    <p class="text-xs text-fox-cream/70 mt-1">
+                        Got a worry, stress, or heavy thought from today? Write it below and let the campfire turn it into harmless embers.
+                    </p>
+                </div>
+
+                <div id="wishInputContainer" class="space-y-3">
+                    <textarea id="wishInput" rows="3" placeholder="e.g. 'I was worried about work today...'" class="w-full bg-black/40 border border-fox-amber/30 rounded-xl p-3 text-sm text-fox-cream placeholder-fox-cream/40 focus:outline-none focus:border-fox-amber transition resize-none"></textarea>
+                    
+                    <button onclick="burnWish()" class="btn-bounce w-full bg-gradient-to-r from-fox-orange to-fox-darkorange text-white font-cute font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-cozy">
+                        <i class="fas fa-fire-alt"></i>
+                        <span>Release & Burn Into Embers</span>
+                    </button>
+                </div>
+
+                <!-- Animated Release Feedback Message -->
+                <div id="wishOutput" class="hidden pop-in bg-black/50 border border-fox-orange/50 p-4 rounded-xl text-center space-y-2">
+                    <div class="text-2xl animate-bounce">✨ 🔥 🐸</div>
+                    <p class="font-cute text-fox-amber text-base">Your worry was safely burned away into tiny floating stars.</p>
+                    <p class="text-xs text-fox-cream/80">Froogie is holding space for u. You don't have to carry it into your sleep tonight.</p>
+                    <button onclick="resetWish()" class="text-xs text-fox-orange hover:underline font-cute pt-2">Release another thought</button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center mt-12 text-xs font-cute text-fox-cream/60 space-y-2">
+        <p>Made with endless warmth & care by froogie 🐸 for someone very special 🦊❤️</p>
+        <p class="text-[10px] text-fox-cream/40">You are worthy of soft rest & quiet peace tonight.</p>
+    </footer>
+
+
+    <!-- AUDIO SYNTHESIZER & JAVASCRIPT GAME LOGIC -->
+    <script>
+        /* ============================================================
+           1. WEB AUDIO API SYNTHESIZER (Campfire Crackle & Soft Chime)
+           ============================================================ */
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let crackleNode = null;
+        let crackleGain = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function toggleAudio() {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const soundIcon = document.getElementById('soundIcon');
+            const soundText = document.getElementById('soundText');
+
+            if (!isAudioPlaying) {
+                startCampfireSound();
+                isAudioPlaying = true;
+                soundIcon.className = "fas fa-volume-up text-fox-amber";
+                soundText.innerText = "Cozy Sounds: ON";
+            } else {
+                stopCampfireSound();
+                isAudioPlaying = false;
+                soundIcon.className = "fas fa-volume-mute text-fox-amber";
+                soundText.innerText = "Cozy Sounds: OFF";
+            }
+        }
+
+        // Generates continuous warm noise filtered to simulate campfire crackle
+        function startCampfireSound() {
+            if (!audioCtx) return;
+
+            // Create brown-like noise buffer
+            const bufferSize = audioCtx.sampleRate * 2;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            let lastOut = 0.0;
+            
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                output[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = output[i];
+                output[i] *= 3.5; 
+            }
+
+            crackleNode = audioCtx.createBufferSource();
+            crackleNode.buffer = noiseBuffer;
+            crackleNode.loop = true;
+
+            // Lowpass filter for soft cozy rumble
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+
+            crackleGain = audioCtx.createGain();
+            crackleGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+            crackleNode.connect(filter);
+            filter.connect(crackleGain);
+            crackleGain.connect(audioCtx.destination);
+
+            crackleNode.start();
+        }
+
+        function stopCampfireSound() {
+            if (crackleNode) {
+                crackleNode.stop();
+                crackleNode.disconnect();
+                crackleNode = null;
+            }
+        }
+
+        // Plays a pleasant relaxing pentatonic bell/chime
+        function playChimeSound() {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C E G C E
+            const freq = notes[Math.floor(Math.random() * notes.length)];
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.8);
+        }
+
+        /* ============================================================
+           2. INTERACTIVE FOX STATE & INTERACTIONS (froogie's messenger)
+           ============================================================ */
+        let isFoxAwake = false;
+
+        const foxMessages = [
+            "froogie sent me to tell u how proud we are of u! 🐸🧡",
+            "sending u the warmest hug from froogie! 🫂✨",
+            "froogie wants u to take a good rest tonight! 🌙",
+            "froogie picked a sweet woodland flower for u! 🌸",
+            "froogie says: 'you did so amazing today, love!' 💌",
+            "froogie is super proud of how hard u tried! 🐾",
+            "take a deep breath, froogie has got your back 🍵",
+            "froogie says u survive 100% of your tough days! 👑"
+        ];
+
+        function wakeUpFox() {
+            const sleepingEyes = document.getElementById('sleepingEyes');
+            const awakeEyes = document.getElementById('awakeEyes');
+            const happyEyes = document.getElementById('happyEyes');
+            const thoughtBubble = document.getElementById('foxThoughtBubble');
+            const thoughtText = document.getElementById('thoughtText');
+
+            playChimeSound();
+
+            if (!isFoxAwake) {
+                isFoxAwake = true;
+                sleepingEyes.setAttribute('opacity', '0');
+                awakeEyes.setAttribute('opacity', '1');
+                
+                thoughtText.innerText = "froogie sent me to check on u! ✨🐸";
+                thoughtBubble.classList.remove('opacity-0');
+                thoughtBubble.classList.add('opacity-100');
+
+                // Spawn cute hearts floating around fox
+                spawnFloatingParticles('🐸', 5);
+
+                setTimeout(() => {
+                    thoughtBubble.classList.remove('opacity-100');
+                    thoughtBubble.classList.add('opacity-0');
+                }, 3000);
+            } else {
+                // Already awake: show happy eyes reaction
+                awakeEyes.setAttribute('opacity', '0');
+                happyEyes.setAttribute('opacity', '1');
+                
+                const randomMsg = foxMessages[Math.floor(Math.random() * foxMessages.length)];
+                thoughtText.innerText = randomMsg;
+                thoughtBubble.classList.remove('opacity-0');
+                thoughtBubble.classList.add('opacity-100');
+
+                spawnFloatingParticles('❤️', 4);
+
+                setTimeout(() => {
+                    happyEyes.setAttribute('opacity', '0');
+                    awakeEyes.setAttribute('opacity', '1');
+                    thoughtBubble.classList.remove('opacity-100');
+                    thoughtBubble.classList.add('opacity-0');
+                }, 3500);
+            }
+        }
+
+        function interactFox(type) {
+            wakeUpFox();
+            const textEl = document.getElementById('foxInteractionText');
+
+            if (type === 'hug') {
+                textEl.innerText = "🫂 *Delivering a big cozy hug from froogie!* Froogie is so proud of u.";
+                spawnFloatingParticles('🐸', 6);
+            } else if (type === 'flower') {
+                const flowers = ['🌸', '🌼', '🌻', '🌺', '🌷'];
+                const f = flowers[Math.floor(Math.random() * flowers.length)];
+                textEl.innerText = `${f} "froogie asked me to hand-deliver this pretty flower to u!"`;
+                spawnFloatingParticles(f, 6);
+            }
+        }
+
+        function spawnFloatingParticles(emoji, count) {
+            const container = document.getElementById('foxContainer');
+            const rect = container.getBoundingClientRect();
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'floating-heart';
+                el.innerText = emoji;
+                
+                // Random position near fox
+                const offsetX = (Math.random() - 0.5) * 120;
+                const offsetY = (Math.random() - 0.5) * 40;
+
+                el.style.left = `${rect.width / 2 + offsetX}px`;
+                el.style.top = `${rect.height / 2 + offsetY}px`;
+
+                container.appendChild(el);
+
+                setTimeout(() => {
+                    el.remove();
+                }, 1800);
+            }
+        }
+
+        /* ============================================================
+           3. COMFORT JAR SYSTEM (froogie's notes)
+           ============================================================ */
+        const jarNotes = [
+            "froogie says: You did enough today. Rest easy now. ♡",
+            "froogie says: I know it was hard, but I'm so proud of u.",
+            "froogie says: Take a deep breath & let your shoulders drop.",
+            "froogie says: You don't have to carry it all at once.",
+            "froogie says: You are so loved and so appreciated.",
+            "froogie says: Sip a warm drink and get comfortable. 🍵",
+            "froogie says: You did what you could today, and that's more than okay.",
+            "froogie says: Be gentle with yourself tonight. ♡"
+        ];
+        let readNotesCount = 0;
+
+        function drawJarNote() {
+            playChimeSound();
+            const output = document.getElementById('jarNoteOutput');
+            const counter = document.getElementById('noteCounter');
+
+            const randomNote = jarNotes[Math.floor(Math.random() * jarNotes.length)];
+            output.innerText = `"${randomNote}"`;
+            output.classList.remove('hidden');
+
+            readNotesCount++;
+            counter.innerText = `${readNotesCount} read`;
+        }
+
+        /* ============================================================
+           4. VIRTUAL GIFT UNWRAP SYSTEM (from froogie)
+           ============================================================ */
+        const gifts = [
+            {
+                icon: "🏆",
+                title: "froogie's Official Hard-Worker Award!",
+                desc: "Awarded with endless love by froogie for trying your absolute best today! You deserve all the rest in the world."
+            },
+            {
+                icon: "🌟",
+                title: "froogie's Jar of Starlight & Calm",
+                desc: "Packed by froogie with 100% pure night peace to wash away all worries and bring u cozy dreams."
+            },
+            {
+                icon: "🍵",
+                title: "Warm Chamomile Tea from froogie",
+                desc: "Brewed specially for u with extra honey and cozy forest warmth. Take a slow virtual sip!"
+            },
+            {
+                icon: "👑",
+                title: "froogie's Crown of Resilience",
+                desc: "Because u made it through another tough day. Wear it proudly while u rest tonight!"
+            }
+        ];
+
+        function unwrapGift() {
+            playChimeSound();
+            const giftBoxContainer = document.getElementById('giftBoxContainer');
+            const giftReward = document.getElementById('giftReward');
+
+            giftBoxContainer.classList.add('hidden');
+
+            const selected = gifts[Math.floor(Math.random() * gifts.length)];
+            document.getElementById('giftBadgeIcon').innerText = selected.icon;
+            document.getElementById('giftTitle').innerText = selected.title;
+            document.getElementById('giftDesc').innerText = selected.desc;
+
+            giftReward.classList.remove('hidden');
+        }
+
+        function resetGift() {
+            document.getElementById('giftBoxContainer').classList.remove('hidden');
+            document.getElementById('giftReward').classList.add('hidden');
+        }
+
+        /* ============================================================
+           5. CAMPFIRE RELEASE / BURN THOUGHT LOGIC
+           ============================================================ */
+        function burnWish() {
+            const input = document.getElementById('wishInput');
+            if (!input.value.trim()) return;
+
+            playChimeSound();
+            document.getElementById('wishInputContainer').classList.add('hidden');
+            document.getElementById('wishOutput').classList.remove('hidden');
+
+            // Add extra glowing ember particles on canvas
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle('ember'));
+            }
+        }
+
+        function resetWish() {
+            document.getElementById('wishInput').value = '';
+            document.getElementById('wishInputContainer').classList.remove('hidden');
+            document.getElementById('wishOutput').classList.add('hidden');
+        }
+
+        /* ============================================================
+           6. CANVAS PARTICLE SYSTEM (Fireflies, Leaves, Embers)
+           ============================================================ */
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(type) {
+                this.type = type || (Math.random() > 0.4 ? 'firefly' : 'leaf');
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = this.type === 'firefly' ? Math.random() * 2.5 + 1 : Math.random() * 5 + 4;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.speedY = this.type === 'firefly' ? (Math.random() - 0.5) * 0.6 : Math.random() * 0.8 + 0.3;
+                this.opacity = Math.random() * 0.7 + 0.3;
+                this.pulseSpeed = Math.random() * 0.03 + 0.01;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.x += this.speedX + Math.sin(this.angle) * 0.5;
+                this.y += this.speedY;
+                this.angle += 0.02;
+
+                if (this.type === 'firefly') {
+                    this.opacity += Math.sin(this.angle) * 0.02;
+                    if (this.opacity < 0.1) this.opacity = 0.1;
+                    if (this.opacity > 0.9) this.opacity = 0.9;
+                }
+
+                // Wrap around edges
+                if (this.y > canvas.height + 10) this.y = -10;
+                if (this.x > canvas.width + 10) this.x = -10;
+                if (this.x < -10) this.x = canvas.width + 10;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.opacity);
+
+                if (this.type === 'firefly') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = '#f2cc8f';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#f2cc8f';
+                    ctx.fill();
+                } else if (this.type === 'leaf') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = '#e07a5f';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'ember') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, Math.random() * 3 + 1, 0, Math.PI * 2);
+                    ctx.fillStyle = '#e05a47';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#e07a5f';
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // Initialize particle array
+        for (let i = 0; i < 45; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.onload = function() {
+            animateParticles();
+        };
+    </script>
+</body>
+</html>

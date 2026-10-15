@@ -71,7 +71,10 @@
   <!-- Navigation Row -->
   <div class="nav-row">
     <a href="#/period" class="nav-pill period-pill" aria-label="Buka Pelacak Siklus Haid">
-      <span> Siklus Haid</span>
+      <span>Siklus Haid</span>
+    </a>
+    <a href="/cozy-corner.html" class="nav-pill cozy-pill" aria-label="Buka A Cozy Corner from Froogie">
+      <span>The Cutest Things </span>
     </a>
   </div>
 </header>
@@ -207,6 +210,17 @@
 
   .nav-pill.period-pill:hover {
     background: #FFE4E6;
+  }
+
+  .nav-pill.cozy-pill {
+    background: #FEF3C7;
+    color: #92400E;
+    border-color: #FDE68A;
+  }
+
+  .nav-pill.cozy-pill:hover {
+    background: #FDE68A;
+    color: #78350F;
   }
 
   .new-dot {
