@@ -8,6 +8,14 @@ export const couple = {
   startDate: "2024-02-14",   // Tanggal jadian (YYYY-MM-DD)
 };
 
+// Gallery Video Setting (YouTube Unlisted)
+// Maggie bisa langsung ganti ID atau link video di sini agar otomatis langsung tampil di HP Winda!
+export const galleryVideo = {
+  youtubeIdOrUrl: "jfKfPfyJRdk", // Ganti dengan link atau 11-digit ID video YouTube Unlisted kamu
+  title: "A Special Video for Winda ✨",
+  subtitle: "Our sweetest moments together ❤️"
+};
+
 // Mood Section – "HOW’S YOUR FEELING" (4 Moods Kodok SVG + Musik)
 export const moodSection = {
   badge: "Mood Tracker",

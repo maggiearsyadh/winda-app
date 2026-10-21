@@ -9,6 +9,7 @@
   import ComingSoonPage  from '$lib/components/ComingSoonPage.svelte';
   import KanbanBoard     from '$lib/components/KanbanBoard.svelte';
   import PeriodTrackerPage from '$lib/components/PeriodTrackerPage.svelte';
+  import GalleryPage     from '$lib/components/GalleryPage.svelte';
 
   // Interactive Modals & Floating Tools
   import MoodModal       from '$lib/components/MoodModal.svelte';
@@ -127,6 +128,9 @@
   {:else if currentRoute === '#/period'}
     <!-- Dedicated Period Tracker Page View -->
     <PeriodTrackerPage onBack={goHome} />
+  {:else if currentRoute === '#/gallery'}
+    <!-- Dedicated Gallery Page View -->
+    <GalleryPage onBack={goHome} />
   {:else}
     <!-- Top Header Navigation -->
     <Header />

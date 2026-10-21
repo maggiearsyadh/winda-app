@@ -74,7 +74,10 @@
       <span>Siklus Haid</span>
     </a>
     <a href="/cozy-corner.html" class="nav-pill cozy-pill" aria-label="Buka A Cozy Corner from Froogie">
-      <span>The Cutest Things </span>
+      <span>The Cutest Things</span>
+    </a>
+    <a href="#/gallery" class="nav-pill gallery-pill" aria-label="Buka Gallery">
+      <span>Gallery</span>
     </a>
   </div>
 </header>
@@ -177,6 +180,14 @@
     display: flex;
     align-items: center;
     gap: var(--sp-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .nav-row::-webkit-scrollbar {
+    display: none;
   }
 
   .nav-pill {
@@ -196,6 +207,8 @@
     transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .nav-pill:active {
@@ -221,6 +234,17 @@
   .nav-pill.cozy-pill:hover {
     background: #FDE68A;
     color: #78350F;
+  }
+
+  .nav-pill.gallery-pill {
+    background: #EEF2FF;
+    color: #4F46E5;
+    border-color: #C7D2FE;
+  }
+
+  .nav-pill.gallery-pill:hover {
+    background: #E0E7FF;
+    color: #3730A3;
   }
 
   .new-dot {
